@@ -386,6 +386,12 @@ h2 em, .brand-text em { font-style: italic; color: var(--gold-hi); }
 .spark { position: fixed; z-index: 70; width: 8px; height: 8px; pointer-events: none; background: var(--gold-hi); clip-path: polygon(50% 0, 62% 38%, 100% 50%, 62% 62%, 50% 100%, 38% 62%, 0 50%, 38% 38%); animation: spark .9s var(--ease) forwards; }
 .fly { position: fixed; z-index: 70; width: 60px; height: 60px; border-radius: 50%; object-fit: cover; pointer-events: none; box-shadow: 0 0 30px rgba(240, 215, 156, .6); transition: transform .8s cubic-bezier(.6, -.2, .7, 1), opacity .8s; }
 
+/* ---------- logo ---------- */
+.brand-logo { height: 44px; width: auto; filter: drop-shadow(0 0 10px rgba(240, 215, 156, .25)); transition: transform .6s var(--ease), filter .6s; }
+.brand:hover .brand-logo { transform: rotate(-4deg) scale(1.06); filter: drop-shadow(0 0 16px rgba(240, 215, 156, .55)); }
+.top.scrolled .brand-logo { height: 38px; }
+.foot-logo { width: 160px; height: auto; filter: drop-shadow(0 0 24px rgba(240, 215, 156, .18)); }
+
 /* ---------- shopping touches ---------- */
 .top-actions { display: flex; gap: .6rem; }
 .saved-btn svg { fill: none; stroke: var(--ink); stroke-width: 1.4; }
