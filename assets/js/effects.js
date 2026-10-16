@@ -1,4 +1,4 @@
-// Motion for the showroom: sections slide in as they scroll into view, and the hero has a light parallax.
+// Motion for the showroom: sections slide in, the hero has a light parallax and product images get a jeweller's loupe.
 
 export const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
 
@@ -32,4 +32,32 @@ export function parallax(hero) {
   };
   addEventListener('scroll', () => { if (!queued) { queued = true; requestAnimationFrame(paint); } }, { passive: true });
   paint();
+}
+
+// Jeweller's loupe: on a mouse, a gold-rimmed lens follows the pointer over
+// product images and shows the piece magnified.
+export function loupe(selector) {
+  if (!matchMedia('(hover: hover) and (pointer: fine)').matches) return;
+  const lens = document.createElement('div');
+  lens.className = 'loupe';
+  lens.setAttribute('aria-hidden', 'true');
+  document.body.append(lens);
+  const ZOOM = 2.4, SIZE = 170;
+  let img = null;
+  addEventListener('pointermove', (e) => {
+    const hit = e.target.closest?.(selector);
+    const el = hit && (hit.tagName === 'IMG' ? hit : hit.querySelector('img'));
+    if (!el || !el.complete) { if (img) { img = null; lens.classList.remove('on'); } return; }
+    const r = el.getBoundingClientRect();
+    if (img !== el) {
+      img = el;
+      lens.style.backgroundImage = `url("${el.currentSrc || el.src}")`;
+      lens.style.backgroundSize = `${r.width * ZOOM}px ${r.height * ZOOM}px`;
+      lens.classList.add('on');
+    }
+    const x = e.clientX - r.left, y = e.clientY - r.top;
+    lens.style.transform = `translate3d(${e.clientX - SIZE / 2}px, ${e.clientY - SIZE / 2}px, 0)`;
+    lens.style.backgroundPosition = `${SIZE / 2 - x * ZOOM}px ${SIZE / 2 - y * ZOOM}px`;
+  }, { passive: true });
+  addEventListener('scroll', () => { img = null; lens.classList.remove('on'); }, { passive: true });
 }

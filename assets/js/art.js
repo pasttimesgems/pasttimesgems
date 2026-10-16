@@ -21,8 +21,8 @@ export function artUrl(kind, variant = 0) {
   const key = `${k}:${v}`;
   if (!cache.has(key)) {
     const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="-300 -300 600 600">
-      <rect x="-300" y="-300" width="600" height="600" fill="#0d1d1b"/>
-      <g fill="none" stroke="#5fd3bc" stroke-width="1" opacity=".34">
+      <rect x="-300" y="-300" width="600" height="600" fill="#12110f"/>
+      <g fill="none" stroke="#cfaa5f" stroke-width="1" opacity=".42">
         <path d="${circle(196) + circle(190)}"/>
         <path d="${ring({ R: 160, amp: 16, waves: WAVES[v], copies: 8, steps: 300 })}"/>
         <path d="${circle(126)}"/>
