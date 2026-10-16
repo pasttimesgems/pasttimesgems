@@ -2,7 +2,7 @@ import { CONFIG } from './config.js';
 import { listProducts, getSettings, money, escapeHtml } from './store.js';
 import { t, getLang, setLang, applyStatic, localName, localDesc } from './i18n.js';
 import { imageSrc } from './art.js';
-import { reveal, reducedMotion, parallax, loupe } from './effects.js';
+import { reveal, reducedMotion, parallax, loupe, galaxy } from './effects.js';
 
 const $ = (s, root = document) => root.querySelector(s);
 const $$ = (s, root = document) => [...root.querySelectorAll(s)];
@@ -25,6 +25,7 @@ const HEART = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20.5S3 1
 
 // ---------- boot ----------
 applyStatic();
+galaxy($('#sky'));
 parallax($('.hero'));
 loupe('.card-media, .spot-art');
 // The floating WhatsApp button steps aside while the hero's own button is on screen.
