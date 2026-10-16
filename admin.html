@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Pasttimes Gems · Admin</title>
+  <meta name="theme-color" content="#06131a">
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;1,500&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/admin.css">
+</head>
+<body>
+  <div class="demo-banner" id="demoBanner" hidden>
+    Demo mode: changes are saved only in this browser. Connect Supabase (see SETUP.md) so customers see your products.
+    <button id="resetDemo" class="link">Reset demo data</button>
+  </div>
+
+  <!-- Login -->
+  <section class="login" id="loginView" hidden>
+    <form class="login-card" id="loginForm">
+      <span class="brand-mark" aria-hidden="true"></span>
+      <h1>Pasttimes <em>Gems</em></h1>
+      <p class="muted">Staff sign in</p>
+      <label>Email<input name="email" type="email" autocomplete="username" required></label>
+      <label>Password<input name="password" type="password" autocomplete="current-password" required></label>
+      <p class="error" id="loginError" role="alert"></p>
+      <button class="btn btn-gold" type="submit">Sign in</button>
+      <p class="muted small" id="loginHint"></p>
+      <a class="muted small" href="./">← Back to the shop</a>
+    </form>
+  </section>
+
+  <!-- Dashboard -->
+  <div class="app" id="appView" hidden>
+    <header class="bar">
+      <a class="brand" href="./" target="_blank" rel="noopener" title="Open the shop">
+        <span class="brand-mark" aria-hidden="true"></span>
+        <span>Pasttimes <em>Gems</em> <small>Admin</small></span>
+      </a>
+      <div class="bar-right">
+        <span class="muted small" id="whoami"></span>
+        <button class="btn btn-ghost sm" id="signOut">Sign out</button>
+      </div>
+    </header>
+
+    <nav class="tabs" role="tablist">
+      <button class="tab is-on" data-tab="products" role="tab" aria-selected="true">Products</button>
+      <button class="tab" data-tab="settings" role="tab" aria-selected="false">Shop settings</button>
+    </nav>
+
+    <main>
+      <section id="tab-products" class="panel">
+        <div class="stats" id="stats"></div>
+        <div class="list-tools">
+          <input id="aSearch" type="search" placeholder="Search products" autocomplete="off">
+          <select id="aFilter">
+            <option value="all">All categories</option>
+            <option value="jewellery">Jewellery</option>
+            <option value="gems">Gems</option>
+            <option value="pearls">Pearls</option>
+          </select>
+          <button class="btn btn-gold" id="newProduct">+ Add product</button>
+        </div>
+        <div class="table" id="productTable"><p class="muted">Loading…</p></div>
+      </section>
+
+      <section id="tab-settings" class="panel" hidden>
+        <form class="card-form" id="settingsForm">
+          <h2>Shop settings</h2>
+          <label>WhatsApp number for orders
+            <input name="whatsapp_number" inputmode="numeric" placeholder="97455512345">
+            <span class="help">Country code and number, digits only. 974 is Qatar.</span>
+          </label>
+          <label>Announcement bar (optional)
+            <input name="announcement" maxlength="140" placeholder="e.g. Free delivery in Doha this week">
+          </label>
+          <label>Instagram username (optional)
+            <input name="instagram" placeholder="pasttimesgems">
+          </label>
+          <div class="row-end"><button class="btn btn-gold" type="submit">Save settings</button></div>
+        </form>
+      </section>
+    </main>
+  </div>
+
+  <!-- Product editor -->
+  <dialog class="editor" id="editor" aria-labelledby="editorTitle">
+    <form id="productForm" method="dialog">
+      <header>
+        <h2 id="editorTitle">Add product</h2>
+        <button type="button" class="x" data-close aria-label="Close">×</button>
+      </header>
+      <div class="editor-body">
+        <div class="photo">
+          <label class="drop" id="drop">
+            <img id="preview" alt="">
+            <span class="drop-hint">Click or drop a photo<br><small>JPG or PNG. We resize it for you.</small></span>
+            <input type="file" name="image" accept="image/*" hidden>
+          </label>
+          <button type="button" class="link small" id="clearPhoto">Use artwork instead of a photo</button>
+        </div>
+        <div class="fields">
+          <label>Name<input name="name" required maxlength="120"></label>
+          <div class="two">
+            <label>Category
+              <select name="category" required>
+                <option value="jewellery">Jewellery</option>
+                <option value="gems">Gems</option>
+                <option value="pearls">Pearls</option>
+              </select>
+            </label>
+            <label>Price (QAR)<input name="price" type="number" min="0" step="0.01" required></label>
+          </div>
+          <label>Description<textarea name="description" rows="3" maxlength="1000"></textarea></label>
+          <div class="two">
+            <label>Material<input name="material" placeholder="18k gold"></label>
+            <label>Size / weight<input name="weight" placeholder="2.1 ct, 8 mm…"></label>
+          </div>
+          <div class="two">
+            <label>Origin<input name="origin" placeholder="Arabian Gulf"></label>
+            <label>Status
+              <select name="status">
+                <option value="available">Available</option>
+                <option value="reserved">Reserved</option>
+                <option value="sold">Sold</option>
+              </select>
+            </label>
+          </div>
+          <div class="checks">
+            <label class="check"><input type="checkbox" name="featured"> Featured (shown first)</label>
+            <label class="check"><input type="checkbox" name="visible" checked> Visible in the shop</label>
+          </div>
+        </div>
+      </div>
+      <footer>
+        <button type="button" class="btn btn-danger sm" id="deleteProduct" hidden>Delete</button>
+        <span class="error" id="editorError" role="alert"></span>
+        <button type="button" class="btn btn-ghost" data-close>Cancel</button>
+        <button type="submit" class="btn btn-gold" id="saveProduct" value="save">Save product</button>
+      </footer>
+    </form>
+  </dialog>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <script type="module" src="assets/js/admin.js"></script>
+</body>
+</html>
