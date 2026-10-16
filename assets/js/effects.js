@@ -3,6 +3,10 @@
 
 export const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
 
+// Emerald, sapphire, ruby, amethyst, citrine, pearl and gold.
+export const GEM_COLORS = ['#38d39f', '#5b8cff', '#ff5a7e', '#b07cff', '#ffc94d', '#f5efe4', '#f0d79c'];
+const pick = (arr) => arr[Math.floor(Math.random() * arr.length)];
+
 export function seaCanvas(canvas) {
   if (reducedMotion) return;
   const ctx = canvas.getContext('2d');
@@ -19,6 +23,7 @@ export function seaCanvas(canvas) {
       phase: Math.random() * Math.PI * 2,
       sway: .2 + Math.random() * .6,
       a: .15 + Math.random() * .5,
+      color: Math.random() < .18 ? pick(GEM_COLORS.slice(0, 5)) : null,
     };
   };
 
@@ -52,10 +57,21 @@ export function seaCanvas(canvas) {
         ctx.fill();
       } else {
         const tw = .5 + .5 * Math.sin(t * 3 + p.phase);
-        ctx.beginPath();
-        ctx.arc(x, p.y, p.r, 0, Math.PI * 2);
-        ctx.fillStyle = `rgba(240, 215, 156, ${p.a * tw})`;
-        ctx.fill();
+        if (p.color) { // a tiny four-point gem glint
+          const r = p.r * 3.2 * tw;
+          ctx.globalAlpha = Math.min(1, p.a * 1.6 * tw);
+          ctx.fillStyle = p.color;
+          ctx.beginPath();
+          ctx.moveTo(x, p.y - r); ctx.lineTo(x + r * .28, p.y); ctx.lineTo(x, p.y + r); ctx.lineTo(x - r * .28, p.y); ctx.closePath();
+          ctx.moveTo(x - r, p.y); ctx.lineTo(x, p.y + r * .28); ctx.lineTo(x + r, p.y); ctx.lineTo(x, p.y - r * .28); ctx.closePath();
+          ctx.fill();
+          ctx.globalAlpha = 1;
+        } else {
+          ctx.beginPath();
+          ctx.arc(x, p.y, p.r, 0, Math.PI * 2);
+          ctx.fillStyle = `rgba(240, 215, 156, ${p.a * tw})`;
+          ctx.fill();
+        }
       }
     }
     requestAnimationFrame(frame);
@@ -70,11 +86,12 @@ export function seaCanvas(canvas) {
   requestAnimationFrame(frame);
 }
 
-export function sparkle(x, y, n = 8, spread = 60) {
+export function sparkle(x, y, n = 8, spread = 60, colors = GEM_COLORS) {
   if (reducedMotion) return;
   for (let i = 0; i < n; i++) {
     const s = document.createElement('span');
     s.className = 'spark';
+    s.style.background = pick(colors);
     const ang = Math.random() * Math.PI * 2, dist = spread * (.4 + Math.random() * .6);
     s.style.left = `${x}px`; s.style.top = `${y}px`;
     s.style.setProperty('--tx', `${Math.cos(ang) * dist}px`);
@@ -155,4 +172,72 @@ export function pearlParallax(pearl) {
     pearl.style.setProperty('--mx', `${x}px`);
     pearl.style.setProperty('--my', `${y}px`);
   }, { passive: true });
+}
+
+// Gems and pearls circling the hero pearl on a tilted ring. Each one passes
+// behind the pearl on the far side and in front of it on the near side.
+export function gemOrbit(el) {
+  if (!el) return;
+  const items = [...el.children];
+  let angle = 0, tilt = 0.32, targetTilt = 0.32, last = performance.now();
+  const place = () => {
+    const w = el.clientWidth, R = w * 0.46;
+    items.forEach((g, i) => {
+      const a = angle + (i / items.length) * Math.PI * 2;
+      const depth = Math.sin(a); // -1 far, +1 near
+      const x = Math.cos(a) * R, y = depth * R * tilt;
+      const s = 0.62 + (depth + 1) * 0.28;
+      g.style.transform = `translate(-50%, -50%) translate(${x}px, ${y}px) scale(${s}) rotate(${a * 1.4}rad)`;
+      g.style.zIndex = depth > 0 ? 4 : 1;
+      g.style.filter = `brightness(${0.65 + (depth + 1) * 0.3}) blur(${depth < -0.4 ? 0.6 : 0}px)`;
+    });
+  };
+  place();
+  if (reducedMotion) return;
+  addEventListener('pointermove', (e) => { targetTilt = 0.18 + (e.clientY / innerHeight) * 0.32; }, { passive: true });
+  const frame = (now) => {
+    const dt = Math.min(64, now - last); last = now;
+    angle += dt * 0.00035;
+    tilt += (targetTilt - tilt) * 0.04;
+    if (!document.hidden) place();
+    requestAnimationFrame(frame);
+  };
+  requestAnimationFrame(frame);
+}
+
+// The Qatari star lattice glows in gold wherever the pointer is.
+export function latticeLight(section) {
+  if (!section || reducedMotion || !matchMedia('(pointer: fine)').matches) return;
+  section.addEventListener('pointermove', (e) => {
+    const r = section.getBoundingClientRect();
+    section.style.setProperty('--lx', `${e.clientX - r.left}px`);
+    section.style.setProperty('--ly', `${e.clientY - r.top}px`);
+  }, { passive: true });
+}
+
+// Opening scene, once per visit. Resolves when the page is uncovered.
+export function playIntro(intro) {
+  const root = document.documentElement;
+  return new Promise((resolve) => {
+    if (!intro || !root.classList.contains('intro-on')) { intro?.remove(); resolve(); return; }
+    try { sessionStorage.setItem('ptg-intro', '1'); } catch { /* storage blocked */ }
+    let finished = false;
+    const timers = [];
+    const finish = () => {
+      if (finished) return;
+      finished = true;
+      timers.forEach(clearTimeout);
+      intro.classList.add('open');
+      resolve();
+      setTimeout(() => { root.classList.remove('intro-on'); intro.remove(); }, 1300);
+    };
+    intro.querySelector('#introSkip')?.addEventListener('click', finish);
+    requestAnimationFrame(() => intro.classList.add('play'));
+    // The pearl bursts into gem-coloured light just as the shell opens fully.
+    timers.push(setTimeout(() => {
+      const r = intro.querySelector('.intro-pearl').getBoundingClientRect();
+      sparkle(r.left + r.width / 2, r.top + r.height / 2, 34, Math.min(innerWidth, 700) * 0.35);
+    }, 2050));
+    timers.push(setTimeout(finish, 5000));
+  });
 }

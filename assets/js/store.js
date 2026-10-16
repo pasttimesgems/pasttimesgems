@@ -200,7 +200,9 @@ export async function signOut() {
 
 // ---------- formatting ----------
 const qar = new Intl.NumberFormat('en-QA', { maximumFractionDigits: 2 });
-export const money = (n) => `${CONFIG.currency} ${qar.format(Number(n) || 0)}`;
+export const money = (n) => (document.documentElement.lang === 'ar'
+  ? `${qar.format(Number(n) || 0)} ر.ق`
+  : `${CONFIG.currency} ${qar.format(Number(n) || 0)}`);
 
 export const escapeHtml = (s) => String(s ?? '').replace(/[&<>"']/g, (c) =>
   ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));

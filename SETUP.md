@@ -100,6 +100,13 @@ Tips:
 
 ---
 
+## After an update
+
+If you set up Supabase before the Arabic product names were added, run
+[`supabase/schema.sql`](supabase/schema.sql) once more in the SQL Editor. It
+only adds what is missing (the `name_ar` and `description_ar` columns) and
+keeps your products.
+
 ## How ordering works
 
 1. A customer adds pieces to their bag and fills in name, phone and address.

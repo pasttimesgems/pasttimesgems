@@ -77,6 +77,8 @@ main { padding: 1.5rem clamp(1rem, 4vw, 2.5rem) 4rem; }
 .row:hover { border-color: var(--gold); transform: translateX(3px); }
 .row img { width: 64px; height: 64px; border-radius: 10px; object-fit: cover; }
 .row .name { font-family: var(--serif); font-size: 1.2rem; }
+[lang="ar"], [dir="rtl"] { font-family: 'Tajawal', var(--sans); letter-spacing: 0; text-transform: none; }
+.row .name-ar { font-family: 'Tajawal', var(--sans); font-size: .9rem; color: var(--muted); margin-inline-start: .4rem; }
 .row .meta { font-size: .78rem; color: var(--muted); }
 .row .price { font-family: var(--serif); color: var(--gold-hi); font-size: 1.1rem; white-space: nowrap; }
 .pill { font-size: .66rem; letter-spacing: .12em; text-transform: uppercase; padding: .25rem .6rem; border-radius: 999px; border: 1px solid var(--line); white-space: nowrap; }

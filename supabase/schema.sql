@@ -37,6 +37,9 @@ create table if not exists public.products (
   visible     boolean not null default true,
   created_at  timestamptz not null default now()
 );
+-- Arabic name and description (optional; added after the first version).
+alter table public.products add column if not exists name_ar text;
+alter table public.products add column if not exists description_ar text;
 alter table public.products enable row level security;
 
 drop policy if exists "Shoppers see visible products" on public.products;
