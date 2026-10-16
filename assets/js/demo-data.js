@@ -13,7 +13,7 @@ export const DEMO_PRODUCTS = [
   { id: 'demo-3', name: 'Sapphire Solitaire Ring', name_ar: 'خاتم ياقوت أزرق منفرد', description_ar: 'ياقوت أزرق صافٍ على حلقة ذهبية رفيعة. تعديل المقاس متاح عند الطلب.', category: 'jewellery', price: 9800, status: 'available', featured: true, visible: true,
     material: '18k yellow gold', weight: '1.4 ct sapphire', origin: 'Sri Lanka',
     description: 'A cornflower-blue sapphire raised on a slim gold band. Sizing available on request.',
-    image_url: 'art:jewellery:-1', created_at: day(12) },
+    image_url: 'art:jewellery:0', created_at: day(12) },
   { id: 'demo-4', name: 'Rosé Baroque Pearl Drop', name_ar: 'قلادة لؤلؤة باروك وردية', description_ar: 'لؤلؤة باروك طبيعية الشكل بلمسات وردية، معلّقة بذهب وردي رقيق.', category: 'pearls', price: 2350, status: 'available', featured: false, visible: true,
     material: 'Freshwater baroque pearl, 18k rose gold', weight: '11 mm', origin: 'Cultured',
     description: 'An organic baroque pearl with pink overtones, hung from a fine rose-gold bail.',

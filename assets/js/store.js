@@ -29,7 +29,7 @@ function db() {
 const fail = (error) => { if (error) throw new Error(error.message || String(error)); };
 
 // ---------- demo store (localStorage) ----------
-const DEMO_KEY = 'ptg-demo-products-v1';
+const DEMO_KEY = 'ptg-demo-products-v2';
 const DEMO_SETTINGS_KEY = 'ptg-demo-settings-v1';
 const DEMO_SESSION_KEY = 'ptg-demo-admin';
 

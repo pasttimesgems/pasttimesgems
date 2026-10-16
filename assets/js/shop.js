@@ -2,7 +2,8 @@ import { CONFIG } from './config.js';
 import { listProducts, getSettings, money, escapeHtml } from './store.js';
 import { t, getLang, setLang, applyStatic, localName, localDesc } from './i18n.js';
 import { imageSrc, artUrl } from './art.js';
-import { seaCanvas, pointerTrail, splitWords, reveal, tilt, sparkle, pearlParallax, reducedMotion, gemOrbit, latticeLight, playIntro } from './effects.js';
+import { reveal, sparkle, reducedMotion, playIntro } from './effects.js';
+import { hero3d } from './hero3d.js';
 
 const $ = (s, root = document) => root.querySelector(s);
 const $$ = (s, root = document) => [...root.querySelectorAll(s)];
@@ -25,20 +26,16 @@ const HEART = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20.5S3 1
 
 // ---------- boot ----------
 applyStatic();
-seaCanvas($('#sea'));
-pointerTrail();
-pearlParallax($('#heroPearl'));
-gemOrbit($('#gemOrbit'));
-latticeLight($('#home'));
 playIntro($('#intro')).then(() => {
   document.body.classList.add('hero-go');
-  splitWords($('[data-split]'));
   reveal($$('.reveal'));
 });
+// The live 3D necklace loads after the page is usable; the poster covers until then.
+const startHero = () => hero3d($('#heroStage'));
+'requestIdleCallback' in window ? requestIdleCallback(startHero, { timeout: 1200 }) : setTimeout(startHero, 300);
 
 $('#langBtn').addEventListener('click', () => {
   setLang(getLang() === 'ar' ? 'en' : 'ar');
-  splitWords($('[data-split]'));
   applySettings();
   renderCounts();
   renderSaved();
@@ -134,12 +131,11 @@ function renderGrid() {
       : p.featured ? `<span class="badge featured">${t('badge.featured')}</span>` : '';
     const name = escapeHtml(localName(p));
     return `
-    <article class="card${sold ? ' is-sold' : ''}" data-id="${escapeHtml(p.id)}" data-cat="${escapeHtml(p.category)}" tabindex="0" style="--d:${Math.min(i, 8) * 0.07}s" aria-label="${name}">
+    <article class="card${sold ? ' is-sold' : ''}" data-id="${escapeHtml(p.id)}" data-cat="${escapeHtml(p.category)}" tabindex="0" style="--d:${(i % 4) * 0.05}s" aria-label="${name}">
       <div class="card-media">${badge}
         <button class="heart" data-heart="${escapeHtml(p.id)}" aria-label="${t('save')} ${name}" aria-pressed="${saved.has(p.id)}">${HEART}</button>
         <img src="${escapeHtml(imageSrc(p))}" alt="${name}" loading="lazy">
         <span class="quick">${t('quick')}</span>
-        <span class="glint" aria-hidden="true"></span>
       </div>
       <div class="card-body">
         <span class="card-cat">${escapeHtml(catLabel(p.category))}</span>
@@ -152,9 +148,7 @@ function renderGrid() {
       </div>
     </article>`;
   }).join('');
-  const cards = $$('.card', grid);
-  cards.forEach(tilt);
-  reveal(cards);
+  reveal($$('.card', grid));
 }
 
 function specLine(p) { return [p.weight, p.origin].filter(Boolean).join(' · '); }
@@ -215,9 +209,7 @@ function renderSpotlight() {
   $('#spotTrack').innerHTML = spotItems.map((p, i) => `
     <article class="spot${i === 0 ? ' is-on' : ''}" data-id="${escapeHtml(p.id)}" aria-hidden="${i !== 0}">
       <div class="spot-art">
-        <span class="beams" aria-hidden="true"></span>
-        <img src="${escapeHtml(imageSrc(p))}" alt="${escapeHtml(localName(p))}">
-        <span class="pedestal" aria-hidden="true"></span>
+        <img src="${escapeHtml(imageSrc(p))}" alt="${escapeHtml(localName(p))}" loading="lazy">
       </div>
       <div class="spot-copy">
         <span class="card-cat">${escapeHtml(catLabel(p.category))}</span>
@@ -372,7 +364,7 @@ if (matchMedia('(pointer: fine)').matches) {
 $('#pmAdd').addEventListener('click', (e) => {
   if (!current) return;
   addToBag(current.id, qty, e.currentTarget);
-  setTimeout(() => modal.close(), 350);
+  setTimeout(() => modal.close(), 220);
 });
 
 // ---------- bag ----------
@@ -407,7 +399,7 @@ function flyToBag(fromEl, src) {
     img.style.transform = `translate(${dx}px, ${dy}px) scale(.2)`;
     img.style.opacity = '.4';
   });
-  setTimeout(() => { img.remove(); done(); }, 800);
+  setTimeout(() => { img.remove(); done(); }, 520);
 }
 
 function bagLines() {
@@ -460,7 +452,7 @@ function openDrawer() {
   drawer.classList.add('open'); drawer.setAttribute('aria-hidden', 'false'); scrim.hidden = false;
   document.body.classList.add('drawer-open');
   document.body.style.overflow = 'hidden';
-  setTimeout(() => $('#drawerClose').focus(), 300);
+  setTimeout(() => $('#drawerClose').focus(), 200);
 }
 function closeDrawer() {
   drawer.classList.remove('open'); drawer.setAttribute('aria-hidden', 'true'); scrim.hidden = true;
@@ -510,7 +502,7 @@ form.addEventListener('submit', (e) => {
 
   if (!waNumber()) toast(t('toast.noNumber'));
   window.open(waLink(msg), '_blank', 'noopener');
-  sparkle(innerWidth / 2, innerHeight / 2, 24, 140);
+  sparkle(innerWidth / 2, innerHeight / 2, 16, 120);
   bag = [];
   saveBag();
   renderBag();
