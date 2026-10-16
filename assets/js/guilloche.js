@@ -19,15 +19,3 @@ export function ring({ R, amp, waves, copies, steps = 360 }) {
 
 export const circle = (r) => `M${r} 0A${r} ${r} 0 1 0 ${-r} 0A${r} ${r} 0 1 0 ${r} 0`;
 
-// The hero medallion, drawn into an <svg viewBox="-300 -300 600 600">.
-export function drawMedallion(svg) {
-  if (!svg) return;
-  const parts = [
-    ['outer', circle(292) + circle(286)],
-    ['band', ring({ R: 252, amp: 14, waves: 36, copies: 9, steps: 720 })],
-    ['thin', circle(228)],
-    ['band', ring({ R: 192, amp: 26, waves: 20, copies: 11, steps: 540 })],
-    ['thin', circle(156) + circle(150)],
-  ];
-  svg.innerHTML = parts.map(([c, d]) => `<path class="${c}" d="${d}"/>`).join('');
-}

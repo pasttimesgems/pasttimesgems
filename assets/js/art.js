@@ -21,13 +21,13 @@ export function artUrl(kind, variant = 0) {
   const key = `${k}:${v}`;
   if (!cache.has(key)) {
     const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="-300 -300 600 600">
-      <rect x="-300" y="-300" width="600" height="600" fill="#151311"/>
-      <g fill="none" stroke="#c8a464" stroke-width="1" opacity=".38">
+      <rect x="-300" y="-300" width="600" height="600" fill="#0d1d1b"/>
+      <g fill="none" stroke="#5fd3bc" stroke-width="1" opacity=".34">
         <path d="${circle(196) + circle(190)}"/>
         <path d="${ring({ R: 160, amp: 16, waves: WAVES[v], copies: 8, steps: 300 })}"/>
         <path d="${circle(126)}"/>
       </g>
-      <g fill="none" stroke="#e3c88e" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round">${ICONS[k]}</g>
+      <g fill="none" stroke="#f4efe8" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round">${ICONS[k]}</g>
     </svg>`;
     cache.set(key, 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg));
   }
