@@ -26,10 +26,9 @@ you can try everything. On the admin page use any email and the password `demo`.
 | `admin.html`, `assets/css/admin.css`, `assets/js/admin.js` | Admin page |
 | `assets/js/config.js` | Shop name, Supabase keys, WhatsApp number |
 | `assets/js/store.js` | Talks to Supabase (or the demo store) |
-| `assets/js/effects.js` | Opening, scroll reveals, sparkles |
-| `assets/js/jewels3d.js`, `assets/js/hero3d.js` | 3D pearls, stones and gold (three.js), and the live hero necklace |
-| `assets/js/art.js`, `assets/art/` | Studio renders used for pieces without a photo |
-| `tools/render.html` | Re-creates the images in `assets/art/` from the 3D models |
+| `assets/js/effects.js` | Scroll fade-ins |
+| `assets/js/guilloche.js` | Engraved line pattern behind the logo |
+| `assets/js/art.js` | Engraved placeholder for pieces without a photo |
 | `supabase/schema.sql` | Database tables and security rules |
 
 ## Try it locally

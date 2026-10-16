@@ -16,7 +16,7 @@ export const CONFIG = {
 
   // WhatsApp number that receives orders: country code + number, digits only.
   // Example for Qatar: '97455512345'. Can also be changed later in the admin page.
-  whatsappNumber: '',
+  whatsappNumber: '97433460196',
 
   instagram: '', // e.g. 'pasttimesgems' (optional)
   currency: 'QAR',

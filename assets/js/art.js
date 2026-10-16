@@ -1,13 +1,37 @@
-// Studio renders used for demo products and for any product that has no
-// photo yet. Image references of the form "art:<kind>:<n>" resolve here.
-// The images are made by tools/render.html from assets/js/jewels3d.js.
+// Placeholder for pieces that have no photo yet: an engraved gold medallion
+// with a line drawing of the category. Real photos uploaded in the admin page
+// replace it.
 
-const COUNTS = { gems: 6, pearls: 4, jewellery: 4 };
+import { ring, circle } from './guilloche.js';
+
+const ICONS = {
+  // A pearl with its highlight.
+  pearls: '<circle r="46"/><path d="M-26 -18a32 32 0 0 1 22-20"/>',
+  // A cut stone seen from the side: table, crown and pavilion facets.
+  gems: '<path d="M-52 -14L-30 -40H30L52 -14L0 46Z M-52 -14H52 M-30 -40L-14 -14L0 -40L14 -14L30 -40 M-14 -14L0 46L14 -14"/>',
+  // A ring with a raised stone.
+  jewellery: '<ellipse cy="16" rx="44" ry="40"/><path d="M-16 -24L-8 -40H8L16 -24Z"/>',
+};
+const WAVES = [18, 22, 26, 30];
+const cache = new Map();
 
 export function artUrl(kind, variant = 0) {
-  const k = COUNTS[kind] ? kind : 'jewellery';
-  const n = COUNTS[k], i = ((Number(variant) || 0) % n + n) % n;
-  return `assets/art/${k}-${i}.webp`;
+  const k = ICONS[kind] ? kind : 'jewellery';
+  const v = ((Number(variant) || 0) % WAVES.length + WAVES.length) % WAVES.length;
+  const key = `${k}:${v}`;
+  if (!cache.has(key)) {
+    const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="-300 -300 600 600">
+      <rect x="-300" y="-300" width="600" height="600" fill="#151311"/>
+      <g fill="none" stroke="#c8a464" stroke-width="1" opacity=".38">
+        <path d="${circle(196) + circle(190)}"/>
+        <path d="${ring({ R: 160, amp: 16, waves: WAVES[v], copies: 8, steps: 300 })}"/>
+        <path d="${circle(126)}"/>
+      </g>
+      <g fill="none" stroke="#e3c88e" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round">${ICONS[k]}</g>
+    </svg>`;
+    cache.set(key, 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg));
+  }
+  return cache.get(key);
 }
 
 // Turn a stored image reference into something an <img> can show.

@@ -1,9 +1,9 @@
 import { CONFIG } from './config.js';
 import { listProducts, getSettings, money, escapeHtml } from './store.js';
 import { t, getLang, setLang, applyStatic, localName, localDesc } from './i18n.js';
-import { imageSrc, artUrl } from './art.js';
-import { reveal, sparkle, reducedMotion, playIntro } from './effects.js';
-import { hero3d } from './hero3d.js';
+import { imageSrc } from './art.js';
+import { reveal, reducedMotion } from './effects.js';
+import { drawMedallion } from './guilloche.js';
 
 const $ = (s, root = document) => root.querySelector(s);
 const $$ = (s, root = document) => [...root.querySelectorAll(s)];
@@ -26,13 +26,8 @@ const HEART = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20.5S3 1
 
 // ---------- boot ----------
 applyStatic();
-playIntro($('#intro')).then(() => {
-  document.body.classList.add('hero-go');
-  reveal($$('.reveal'));
-});
-// The live 3D necklace loads after the page is usable; the poster covers until then.
-const startHero = () => hero3d($('#heroStage'));
-'requestIdleCallback' in window ? requestIdleCallback(startHero, { timeout: 1200 }) : setTimeout(startHero, 300);
+drawMedallion($('#heroGuilloche'));
+reveal($$('.reveal'));
 
 $('#langBtn').addEventListener('click', () => {
   setLang(getLang() === 'ar' ? 'en' : 'ar');
@@ -44,7 +39,6 @@ $('#langBtn').addEventListener('click', () => {
   renderBag();
   if (modal.open && current) openProduct(current.id);
 });
-$$('[data-art]').forEach((img) => { const [k, v] = img.dataset.art.split(':'); img.src = artUrl(k, v); });
 $('#year').textContent = new Date().getFullYear();
 $('#footLoc').textContent = CONFIG.location;
 
@@ -86,7 +80,7 @@ async function init() {
 function applySettings() {
   const { announcement, instagram } = state.settings;
   if (announcement) { const a = $('#announce'); a.textContent = announcement; a.hidden = false; }
-  $('#footWa').href = waLink(t('wa.hello', { shop: CONFIG.shopName }));
+  $('#footWa').href = $('#heroWa').href = waLink(t('wa.hello', { shop: CONFIG.shopName }));
   if (instagram) {
     const ig = $('#footIg');
     ig.href = `https://instagram.com/${instagram.replace(/^@/, '')}`;
@@ -169,10 +163,6 @@ function toggleSaved(id, fromEl) {
   persistSaved();
   $$(`[data-heart="${CSS.escape(id)}"]`).forEach((h) => h.setAttribute('aria-pressed', on));
   if (current?.id === id) $('#pmHeart').setAttribute('aria-pressed', on);
-  if (on && fromEl) {
-    const r = fromEl.getBoundingClientRect();
-    sparkle(r.left + r.width / 2, r.top + r.height / 2, 8, 36);
-  }
   renderSaved();
   if (state.filter === 'saved') renderGrid();
   const p = state.products.find((x) => x.id === id);
@@ -384,7 +374,6 @@ function flyToBag(fromEl, src) {
   const end = btn.getBoundingClientRect();
   const done = () => {
     btn.classList.remove('bump'); void btn.offsetWidth; btn.classList.add('bump');
-    sparkle(end.left + end.width / 2, end.top + end.height / 2, 10, 50);
   };
   if (reducedMotion || !fromEl) { done(); return; }
   const start = fromEl.getBoundingClientRect();
@@ -502,7 +491,6 @@ form.addEventListener('submit', (e) => {
 
   if (!waNumber()) toast(t('toast.noNumber'));
   window.open(waLink(msg), '_blank', 'noopener');
-  sparkle(innerWidth / 2, innerHeight / 2, 16, 120);
   bag = [];
   saveBag();
   renderBag();
