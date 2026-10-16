@@ -1,11 +1,12 @@
 import { CONFIG } from './config.js';
-import { listProducts, getSettings, money, escapeHtml, CATEGORIES } from './store.js';
+import { listProducts, getSettings, money, escapeHtml } from './store.js';
+import { t, getLang, setLang, applyStatic, localName, localDesc } from './i18n.js';
 import { imageSrc, artUrl } from './art.js';
-import { seaCanvas, pointerTrail, splitWords, reveal, tilt, sparkle, pearlParallax, reducedMotion } from './effects.js';
+import { seaCanvas, pointerTrail, splitWords, reveal, tilt, sparkle, pearlParallax, reducedMotion, gemOrbit, latticeLight, playIntro } from './effects.js';
 
 const $ = (s, root = document) => root.querySelector(s);
 const $$ = (s, root = document) => [...root.querySelectorAll(s)];
-const catLabel = (id) => CATEGORIES.find((c) => c.id === id)?.label || id;
+const catLabel = (id) => t(`cat.${id}`);
 
 const state = { products: [], filter: 'all', query: '', sort: 'featured', settings: {} };
 
@@ -23,11 +24,29 @@ const persistSaved = () => { try { localStorage.setItem(SAVED_KEY, JSON.stringif
 const HEART = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20.5S3 15 3 9a4.5 4.5 0 0 1 9-1 4.5 4.5 0 0 1 9 1c0 6-9 11.5-9 11.5Z"/></svg>';
 
 // ---------- boot ----------
+applyStatic();
 seaCanvas($('#sea'));
 pointerTrail();
-splitWords($('[data-split]'));
 pearlParallax($('#heroPearl'));
-reveal($$('.reveal'));
+gemOrbit($('#gemOrbit'));
+latticeLight($('#home'));
+playIntro($('#intro')).then(() => {
+  document.body.classList.add('hero-go');
+  splitWords($('[data-split]'));
+  reveal($$('.reveal'));
+});
+
+$('#langBtn').addEventListener('click', () => {
+  setLang(getLang() === 'ar' ? 'en' : 'ar');
+  splitWords($('[data-split]'));
+  applySettings();
+  renderCounts();
+  renderSaved();
+  renderSpotlight();
+  renderGrid();
+  renderBag();
+  if (modal.open && current) openProduct(current.id);
+});
 $$('[data-art]').forEach((img) => { const [k, v] = img.dataset.art.split(':'); img.src = artUrl(k, v); });
 $('#year').textContent = new Date().getFullYear();
 $('#footLoc').textContent = CONFIG.location;
@@ -47,7 +66,7 @@ async function init() {
   state.settings = settings;
   applySettings();
   if (!products) {
-    $('#grid').innerHTML = '<p class="empty">We could not open the collection just now. Please refresh in a moment.</p>';
+    $('#grid').innerHTML = `<p class="empty">${t('empty.error')}</p>`;
     return;
   }
   state.products = products;
@@ -70,7 +89,7 @@ async function init() {
 function applySettings() {
   const { announcement, instagram } = state.settings;
   if (announcement) { const a = $('#announce'); a.textContent = announcement; a.hidden = false; }
-  $('#footWa').href = waLink(`Hello ${CONFIG.shopName}, I have a question.`);
+  $('#footWa').href = waLink(t('wa.hello', { shop: CONFIG.shopName }));
   if (instagram) {
     const ig = $('#footIg');
     ig.href = `https://instagram.com/${instagram.replace(/^@/, '')}`;
@@ -90,7 +109,7 @@ function visibleProducts() {
   const q = state.query.trim().toLowerCase();
   let list = state.products.filter((p) =>
     (state.filter === 'all' || p.category === state.filter || (state.filter === 'saved' && saved.has(p.id))) &&
-    (!q || [p.name, p.description, p.material, p.origin].join(' ').toLowerCase().includes(q)));
+    (!q || [p.name, p.name_ar, p.description, p.description_ar, p.material, p.origin].join(' ').toLowerCase().includes(q)));
   const sorters = {
     featured: (a, b) => (b.featured - a.featured) || ((a.status === 'sold') - (b.status === 'sold')),
     new: (a, b) => String(b.created_at).localeCompare(String(a.created_at)),
@@ -104,30 +123,31 @@ function renderGrid() {
   const grid = $('#grid');
   const list = visibleProducts();
   if (!list.length) {
-    grid.innerHTML = `<p class="empty">${!state.products.length ? 'New pieces are being polished. Please check back soon.'
-      : state.filter === 'saved' ? 'Tap the heart on any piece to save it here.' : 'No pieces match that search.'}</p>`;
+    grid.innerHTML = `<p class="empty">${!state.products.length ? t('empty.none')
+      : state.filter === 'saved' ? t('empty.saved') : t('empty.search')}</p>`;
     return;
   }
   grid.innerHTML = list.map((p, i) => {
     const sold = p.status === 'sold';
-    const badge = sold ? '<span class="badge sold">Sold</span>'
-      : p.status === 'reserved' ? '<span class="badge reserved">Reserved</span>'
-      : p.featured ? '<span class="badge featured">✦ Featured</span>' : '';
+    const badge = sold ? `<span class="badge sold">${t('badge.sold')}</span>`
+      : p.status === 'reserved' ? `<span class="badge reserved">${t('badge.reserved')}</span>`
+      : p.featured ? `<span class="badge featured">${t('badge.featured')}</span>` : '';
+    const name = escapeHtml(localName(p));
     return `
-    <article class="card${sold ? ' is-sold' : ''}" data-id="${escapeHtml(p.id)}" tabindex="0" style="--d:${Math.min(i, 8) * 0.07}s" aria-label="${escapeHtml(p.name)}">
+    <article class="card${sold ? ' is-sold' : ''}" data-id="${escapeHtml(p.id)}" data-cat="${escapeHtml(p.category)}" tabindex="0" style="--d:${Math.min(i, 8) * 0.07}s" aria-label="${name}">
       <div class="card-media">${badge}
-        <button class="heart" data-heart="${escapeHtml(p.id)}" aria-label="Save ${escapeHtml(p.name)}" aria-pressed="${saved.has(p.id)}">${HEART}</button>
-        <img src="${escapeHtml(imageSrc(p))}" alt="${escapeHtml(p.name)}" loading="lazy">
-        <span class="quick">Quick view</span>
+        <button class="heart" data-heart="${escapeHtml(p.id)}" aria-label="${t('save')} ${name}" aria-pressed="${saved.has(p.id)}">${HEART}</button>
+        <img src="${escapeHtml(imageSrc(p))}" alt="${name}" loading="lazy">
+        <span class="quick">${t('quick')}</span>
         <span class="glint" aria-hidden="true"></span>
       </div>
       <div class="card-body">
         <span class="card-cat">${escapeHtml(catLabel(p.category))}</span>
-        <h3 class="card-name">${escapeHtml(p.name)}</h3>
+        <h3 class="card-name">${name}</h3>
         ${specLine(p) ? `<p class="card-spec">${escapeHtml(specLine(p))}</p>` : ''}
         <div class="card-foot">
           <span class="price">${money(p.price)}</span>
-          <button class="add" data-add="${escapeHtml(p.id)}" aria-label="Add ${escapeHtml(p.name)} to bag" ${sold ? 'disabled' : ''}>+</button>
+          <button class="add" data-add="${escapeHtml(p.id)}" aria-label="${t('addTo', { name })}" ${sold ? 'disabled' : ''}>+</button>
         </div>
       </div>
     </article>`;
@@ -162,7 +182,7 @@ function toggleSaved(id, fromEl) {
   renderSaved();
   if (state.filter === 'saved') renderGrid();
   const p = state.products.find((x) => x.id === id);
-  toast(on ? `${p?.name || 'Piece'} saved` : 'Removed from saved');
+  toast(on ? t('toast.saved', { name: localName(p) }) : t('toast.unsaved'));
 }
 
 function renderSaved() {
@@ -177,7 +197,7 @@ function renderSaved() {
 }
 
 $('#savedBtn').addEventListener('click', () => {
-  if (!saved.size) { toast('Tap the heart on any piece to save it.'); return; }
+  if (!saved.size) { toast(t('toast.saveHint')); return; }
   setFilter('saved');
   $('#collection').scrollIntoView({ behavior: reducedMotion ? 'auto' : 'smooth' });
 });
@@ -189,29 +209,30 @@ function renderSpotlight() {
   const featured = state.products.filter((p) => p.featured && p.status !== 'sold');
   spotItems = (featured.length ? featured : state.products.filter((p) => p.status === 'available')).slice(0, 6);
   if (spotItems.length < 2) return;
+  spotIndex = 0;
   $('#spotlight').hidden = false;
   reveal($$('#spotlight .reveal'));
   $('#spotTrack').innerHTML = spotItems.map((p, i) => `
     <article class="spot${i === 0 ? ' is-on' : ''}" data-id="${escapeHtml(p.id)}" aria-hidden="${i !== 0}">
       <div class="spot-art">
         <span class="beams" aria-hidden="true"></span>
-        <img src="${escapeHtml(imageSrc(p))}" alt="${escapeHtml(p.name)}">
+        <img src="${escapeHtml(imageSrc(p))}" alt="${escapeHtml(localName(p))}">
         <span class="pedestal" aria-hidden="true"></span>
       </div>
       <div class="spot-copy">
         <span class="card-cat">${escapeHtml(catLabel(p.category))}</span>
-        <h3>${escapeHtml(p.name)}</h3>
-        <p class="spot-desc">${escapeHtml(p.description || '')}</p>
+        <h3>${escapeHtml(localName(p))}</h3>
+        <p class="spot-desc">${escapeHtml(localDesc(p))}</p>
         ${specLine(p) ? `<p class="card-spec">${escapeHtml(specLine(p))}</p>` : ''}
         <p class="price">${money(p.price)}</p>
         <div class="spot-actions">
-          <button class="btn btn-gold" data-add="${escapeHtml(p.id)}">Add to bag</button>
-          <button class="btn btn-ghost" data-view="${escapeHtml(p.id)}">View details</button>
+          <button class="btn btn-gold" data-add="${escapeHtml(p.id)}">${t('add')}</button>
+          <button class="btn btn-ghost" data-view="${escapeHtml(p.id)}">${t('spot.view')}</button>
         </div>
       </div>
     </article>`).join('');
   $('#spotDots').innerHTML = spotItems.map((p, i) =>
-    `<button class="spot-dot${i === 0 ? ' is-on' : ''}" data-i="${i}" role="tab" aria-label="${escapeHtml(p.name)}" aria-selected="${i === 0}"><span></span></button>`).join('');
+    `<button class="spot-dot${i === 0 ? ' is-on' : ''}" data-i="${i}" role="tab" aria-label="${escapeHtml(localName(p))}" aria-selected="${i === 0}"><span></span></button>`).join('');
   startSpot();
 }
 
@@ -287,20 +308,20 @@ function openProduct(id) {
   if (!p) return;
   current = p; qty = 1;
   $('#pmImg').src = imageSrc(p);
-  $('#pmImg').alt = p.name;
+  $('#pmImg').alt = localName(p);
   $('#pmCat').textContent = catLabel(p.category);
-  $('#pmName').textContent = p.name;
+  $('#pmName').textContent = localName(p);
   $('#pmPrice').textContent = money(p.price);
-  $('#pmDesc').textContent = p.description || '';
-  const specs = [['Material', p.material], ['Size / weight', p.weight], ['Origin', p.origin],
-    ['Status', p.status === 'available' ? 'Available' : p.status === 'reserved' ? 'Reserved' : 'Sold']];
+  $('#pmDesc').textContent = localDesc(p);
+  const specs = [[t('spec.material'), p.material], [t('spec.weight'), p.weight], [t('spec.origin'), p.origin],
+    [t('spec.status'), t(`status.${p.status}`)]];
   $('#pmSpecs').innerHTML = specs.filter(([, v]) => v)
     .map(([k, v]) => `<dt>${k}</dt><dd>${escapeHtml(v)}</dd>`).join('');
   $('#pmQty').textContent = qty;
   const sold = p.status === 'sold';
   $('#pmAdd').disabled = sold;
-  $('#pmAdd').textContent = sold ? 'Sold' : 'Add to bag';
-  $('#pmAsk').href = waLink(`Hello ${CONFIG.shopName}, I'm interested in "${p.name}" (${money(p.price)}). Is it available?\n${productUrl(p)}`);
+  $('#pmAdd').textContent = sold ? t('status.sold') : t('add');
+  $('#pmAsk').href = waLink(`${t('wa.ask', { shop: CONFIG.shopName, name: localName(p), price: money(p.price) })}\n${productUrl(p)}`);
   $('#pmHeart').setAttribute('aria-pressed', saved.has(p.id));
   const more = state.products
     .filter((x) => x.id !== p.id && x.status !== 'sold')
@@ -310,7 +331,7 @@ function openProduct(id) {
   $('#pmMoreList').innerHTML = more.map((x) => `
     <button class="mini" data-open="${escapeHtml(x.id)}">
       <img src="${escapeHtml(imageSrc(x))}" alt="">
-      <span class="mini-name">${escapeHtml(x.name)}</span>
+      <span class="mini-name">${escapeHtml(localName(x))}</span>
       <span class="price">${money(x.price)}</span>
     </button>`).join('');
   history.replaceState(null, '', `#piece-${p.id}`);
@@ -363,7 +384,7 @@ function addToBag(id, n, fromEl) {
   saveBag();
   renderBag();
   flyToBag(fromEl, imageSrc(p));
-  toast(`${p.name} added to your bag`);
+  toast(t('toast.added', { name: localName(p) }));
 }
 
 function flyToBag(fromEl, src) {
@@ -405,17 +426,17 @@ function renderBag() {
   $('#bagTotal').textContent = money(bagTotal());
   $('#bagBar').hidden = count === 0;
   document.body.classList.toggle('has-bag', count > 0);
-  $('#bagBarCount').textContent = `${count} ${count === 1 ? 'piece' : 'pieces'}`;
+  $('#bagBarCount').textContent = count === 1 ? t('pieces.one') : t('pieces.many', { n: count });
   $('#bagBarTotal').textContent = money(bagTotal());
   $('#bagList').innerHTML = lines.map(({ p, qty: q }) => `
     <li class="bag-item" data-id="${escapeHtml(p.id)}">
       <img src="${escapeHtml(imageSrc(p))}" alt="">
       <div>
-        <h3>${escapeHtml(p.name)}</h3>
+        <h3>${escapeHtml(localName(p))}</h3>
         <span class="price">${money(p.price * q)}</span>
-        <div><button class="remove" data-remove>Remove</button></div>
+        <div><button class="remove" data-remove>${t('remove')}</button></div>
       </div>
-      <div class="qty"><button data-step="-1" aria-label="Fewer">−</button><output>${q}</output><button data-step="1" aria-label="More">+</button></div>
+      <div class="qty"><button data-step="-1" aria-label="${t('pm.fewer')}">−</button><output>${q}</output><button data-step="1" aria-label="${t('pm.moreQty')}">+</button></div>
     </li>`).join('');
 }
 
@@ -459,6 +480,7 @@ const form = $('#checkout');
 try {
   const saved = JSON.parse(localStorage.getItem(DETAILS_KEY)) || {};
   for (const [k, v] of Object.entries(saved)) if (form.elements[k] && k !== 'notes') form.elements[k].value = v;
+  if (!form.elements.delivery.value) form.elements.delivery.value = 'home';
 } catch { /* nothing saved */ }
 
 form.addEventListener('submit', (e) => {
@@ -469,22 +491,24 @@ form.addEventListener('submit', (e) => {
   try { localStorage.setItem(DETAILS_KEY, JSON.stringify({ name: d.name, phone: d.phone, delivery: d.delivery, address: d.address })); } catch { /* ignore */ }
 
   const ref = 'PTG-' + Date.now().toString(36).toUpperCase().slice(-6);
+  // Staff always see the English name too, so they can match the piece in the admin page.
+  const itemName = (p) => (localName(p) === p.name ? p.name : `${localName(p)} (${p.name})`);
   const msg = [
-    `*New order · ${CONFIG.shopName}*`,
-    `Order ref: ${ref}`,
+    `*${t('wa.order', { shop: CONFIG.shopName })}*`,
+    `${t('wa.ref')}: ${ref}`,
     '',
-    ...lines.map((l, i) => `${i + 1}. ${l.p.name} (${catLabel(l.p.category)})\n    Qty ${l.qty} × ${money(l.p.price)} = ${money(l.p.price * l.qty)}`),
+    ...lines.map((l, i) => `${i + 1}. ${itemName(l.p)} · ${catLabel(l.p.category)}\n    ${t('wa.qty')} ${l.qty} × ${money(l.p.price)} = ${money(l.p.price * l.qty)}`),
     '',
-    `*Total: ${money(bagTotal())}*`,
+    `*${t('wa.total')}: ${money(bagTotal())}*`,
     '',
-    `Name: ${d.name}`,
-    `Phone: ${d.phone}`,
-    `Delivery: ${d.delivery}`,
-    d.address ? `Address: ${d.address}` : null,
-    d.notes ? `Notes: ${d.notes}` : null,
+    `${t('wa.name')}: ${d.name}`,
+    `${t('wa.phone')}: ${d.phone}`,
+    `${t('wa.delivery')}: ${t(`f.${d.delivery}`)}`,
+    d.address ? `${t('wa.address')}: ${d.address}` : null,
+    d.notes ? `${t('wa.notes')}: ${d.notes}` : null,
   ].filter((x) => x !== null).join('\n');
 
-  if (!waNumber()) toast('The shop number is not set yet, so choose the shop in WhatsApp.');
+  if (!waNumber()) toast(t('toast.noNumber'));
   window.open(waLink(msg), '_blank', 'noopener');
   sparkle(innerWidth / 2, innerHeight / 2, 24, 140);
   bag = [];
@@ -492,15 +516,15 @@ form.addEventListener('submit', (e) => {
   renderBag();
   form.elements.notes.value = '';
   closeDrawer();
-  toast(`Order ${ref} is ready in WhatsApp. Press send to place it.`);
+  toast(t('toast.ready', { ref }));
 });
 
 // ---------- toast ----------
 let toastTimer;
 function toast(text) {
-  const t = $('#toast');
-  t.textContent = text;
-  t.classList.add('show');
+  const el = $('#toast');
+  el.textContent = text;
+  el.classList.add('show');
   clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => t.classList.remove('show'), 3200);
+  toastTimer = setTimeout(() => el.classList.remove('show'), 3200);
 }

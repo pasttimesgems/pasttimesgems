@@ -10,7 +10,7 @@
   <link rel="apple-touch-icon" href="assets/brand/apple-touch-icon.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;1,500&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;1,500&family=Jost:wght@300;400;500&family=Tajawal:wght@400&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="assets/css/admin.css">
 </head>
 <body>
@@ -104,7 +104,10 @@
           <button type="button" class="link small" id="clearPhoto">Use artwork instead of a photo</button>
         </div>
         <div class="fields">
-          <label>Name<input name="name" required maxlength="120"></label>
+          <div class="two">
+            <label>Name<input name="name" required maxlength="120"></label>
+            <label>Name in Arabic (optional)<input name="name_ar" dir="rtl" lang="ar" maxlength="120" placeholder="عقد لؤلؤ"></label>
+          </div>
           <div class="two">
             <label>Category
               <select name="category" required>
@@ -116,6 +119,7 @@
             <label>Price (QAR)<input name="price" type="number" min="0" step="0.01" required></label>
           </div>
           <label>Description<textarea name="description" rows="3" maxlength="1000"></textarea></label>
+          <label>Description in Arabic (optional)<textarea name="description_ar" dir="rtl" lang="ar" rows="3" maxlength="1000"></textarea></label>
           <div class="two">
             <label>Material<input name="material" placeholder="18k gold"></label>
             <label>Size / weight<input name="weight" placeholder="2.1 ct, 8 mm…"></label>

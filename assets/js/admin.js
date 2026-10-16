@@ -115,7 +115,7 @@ function renderProducts() {
     <div class="row" data-id="${escapeHtml(p.id)}" style="animation-delay:${Math.min(i, 12) * 30}ms">
       <img src="${escapeHtml(imageSrc(p))}" alt="">
       <div>
-        <div class="name">${escapeHtml(p.name)}${p.featured ? ' <span title="Featured">✦</span>' : ''}</div>
+        <div class="name">${escapeHtml(p.name)}${p.name_ar ? ` <span class="name-ar" lang="ar">${escapeHtml(p.name_ar)}</span>` : ''}${p.featured ? ' <span title="Featured">✦</span>' : ''}</div>
         <div class="meta">${escapeHtml(catLabel(p.category))}${p.weight ? ' · ' + escapeHtml(p.weight) : ''}</div>
       </div>
       <div class="pills">
@@ -149,7 +149,7 @@ function openEditor(p) {
   $('#editorTitle').textContent = p ? 'Edit product' : 'Add product';
   $('#deleteProduct').hidden = !p;
   const v = p || { category: 'jewellery', status: 'available', visible: true };
-  for (const name of ['name', 'category', 'price', 'description', 'material', 'weight', 'origin', 'status']) {
+  for (const name of ['name', 'name_ar', 'category', 'price', 'description', 'description_ar', 'material', 'weight', 'origin', 'status']) {
     form.elements[name].value = v[name] ?? '';
   }
   form.elements.featured.checked = Boolean(v.featured);
@@ -195,7 +195,9 @@ form.addEventListener('submit', async (e) => {
     name: el.name.value.trim(),
     category: el.category.value,
     price: el.price.value,
+    name_ar: el.name_ar.value.trim(),
     description: el.description.value.trim(),
+    description_ar: el.description_ar.value.trim(),
     material: el.material.value.trim(),
     weight: el.weight.value.trim(),
     origin: el.origin.value.trim(),
