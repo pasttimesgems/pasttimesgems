@@ -1,0 +1,225 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Pasttimes Gems · Jewellery, Gems &amp; Pearls in Doha</title>
+  <meta name="description" content="Pasttimes Gems, Doha: natural pearls, precious gems and handcrafted jewellery. Browse the collection and order on WhatsApp.">
+  <meta name="theme-color" content="#06131a">
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Jost:wght@300;400;500&family=Amiri:wght@400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/shop.css">
+</head>
+<body>
+  <canvas id="sea" aria-hidden="true"></canvas>
+  <div class="announce" id="announce" hidden></div>
+
+  <header class="top" id="top">
+    <a class="brand" href="#home" aria-label="Pasttimes Gems home">
+      <span class="brand-mark" aria-hidden="true"></span>
+      <span class="brand-text">Pasttimes <em>Gems</em></span>
+    </a>
+    <nav class="nav" aria-label="Main">
+      <a href="#collection">Collection</a>
+      <a href="#heritage">Heritage</a>
+      <a href="#order">How to order</a>
+    </nav>
+    <button class="bag-btn" id="bagBtn" aria-label="Open your bag">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 8h12l-1 12H7L6 8Z"/><path d="M9 8a3 3 0 0 1 6 0"/></svg>
+      <span class="bag-count" id="bagCount">0</span>
+    </button>
+  </header>
+
+  <main>
+    <section class="hero" id="home">
+      <div class="hero-copy">
+        <p class="eyebrow reveal">Doha · Since the pearling days</p>
+        <h1 class="hero-title" data-split>Treasures of the Gulf,<br>set for today</h1>
+        <p class="hero-sub reveal">Natural pearls, precious gems and handcrafted jewellery, chosen one piece at a time.</p>
+        <div class="hero-cta reveal">
+          <a class="btn btn-gold" href="#collection">Explore the collection</a>
+          <a class="btn btn-ghost" href="#heritage">Our story</a>
+        </div>
+      </div>
+      <div class="hero-art" aria-hidden="true">
+        <div class="halo"></div>
+        <div class="orbit">
+          <span class="orb-gem g1"></span><span class="orb-gem g2"></span><span class="orb-gem g3"></span>
+          <span class="orb-pearl p1"></span><span class="orb-pearl p2"></span>
+        </div>
+        <div class="pearl" id="heroPearl"><span class="pearl-sheen"></span><span class="pearl-glint"></span></div>
+        <div class="shell-ripple"></div>
+      </div>
+      <a class="scroll-hint" href="#collection" aria-label="Scroll to collection"><span></span></a>
+    </section>
+
+    <div class="marquee" aria-hidden="true">
+      <div class="marquee-track">
+        <span>Natural pearls</span><i>✦</i><span>Precious gems</span><i>✦</i><span>Handcrafted jewellery</span><i>✦</i><span class="ar">لؤلؤ · أحجار كريمة · مجوهرات</span><i>✦</i>
+        <span>Natural pearls</span><i>✦</i><span>Precious gems</span><i>✦</i><span>Handcrafted jewellery</span><i>✦</i><span class="ar">لؤلؤ · أحجار كريمة · مجوهرات</span><i>✦</i>
+      </div>
+    </div>
+
+    <section class="cats" aria-label="Shop by category">
+      <button class="cat reveal" data-cat="jewellery"><img alt="" data-art="jewellery:-1"><span class="cat-name">Jewellery</span><span class="cat-note">Rings, necklaces &amp; more</span></button>
+      <button class="cat reveal" data-cat="gems"><img alt="" data-art="gems:0"><span class="cat-name">Gems</span><span class="cat-note">Loose precious stones</span></button>
+      <button class="cat reveal" data-cat="pearls"><img alt="" data-art="pearls:0"><span class="cat-name">Pearls</span><span class="cat-note">From the sea, by hand</span></button>
+    </section>
+
+    <section class="collection" id="collection">
+      <div class="section-head reveal">
+        <p class="eyebrow">The collection</p>
+        <h2>Pieces available now</h2>
+        <div class="gold-rule"><span></span></div>
+      </div>
+
+      <div class="toolbar reveal">
+        <div class="chips" role="tablist" aria-label="Filter by category">
+          <button class="chip is-on" data-filter="all" role="tab" aria-selected="true">All</button>
+          <button class="chip" data-filter="jewellery" role="tab" aria-selected="false">Jewellery</button>
+          <button class="chip" data-filter="gems" role="tab" aria-selected="false">Gems</button>
+          <button class="chip" data-filter="pearls" role="tab" aria-selected="false">Pearls</button>
+        </div>
+        <div class="tools">
+          <label class="search"><span class="sr">Search</span>
+            <input id="search" type="search" placeholder="Search pieces" autocomplete="off">
+          </label>
+          <label class="sort"><span class="sr">Sort</span>
+            <select id="sort">
+              <option value="featured">Featured</option>
+              <option value="new">Newest</option>
+              <option value="low">Price: low to high</option>
+              <option value="high">Price: high to low</option>
+            </select>
+          </label>
+        </div>
+      </div>
+
+      <div class="grid" id="grid" aria-live="polite">
+        <div class="loading"><span class="spinner-pearl"></span>Opening the vault…</div>
+      </div>
+    </section>
+
+    <section class="heritage" id="heritage">
+      <svg class="waves" viewBox="0 0 1440 120" preserveAspectRatio="none" aria-hidden="true">
+        <path d="M0 60 Q180 10 360 60 T720 60 T1080 60 T1440 60"/>
+        <path d="M0 80 Q180 30 360 80 T720 80 T1080 80 T1440 80"/>
+      </svg>
+      <div class="heritage-inner">
+        <div class="heritage-text reveal">
+          <p class="eyebrow">Our heritage</p>
+          <h2>Born of the sea, <em>kept by hand</em></h2>
+          <p>Long before the towers of West Bay, Qatar's fortune came from the sea. Divers left on dhows each summer, holding their breath for the pearls hidden in Gulf oysters.</p>
+          <p>Pasttimes Gems carries that patience forward. Every pearl, stone and setting is chosen by eye, described honestly, and handed over in person here in Doha.</p>
+          <ul class="promises">
+            <li><span>✦</span>Every piece described honestly</li>
+            <li><span>✦</span>Prices shown in Qatari riyal</li>
+            <li><span>✦</span>Personal delivery or viewing in Doha</li>
+          </ul>
+        </div>
+        <div class="heritage-art reveal" aria-hidden="true">
+          <div class="dhow">
+            <svg viewBox="0 0 300 220">
+              <path class="sail" d="M150 20 L150 150 L60 150 Q90 80 150 20Z"/>
+              <path class="sail s2" d="M158 50 L158 150 L230 150 Q205 95 158 50Z"/>
+              <path class="hull" d="M30 160 L270 160 Q250 195 200 198 L90 198 Q45 195 30 160Z"/>
+              <path class="sea" d="M0 205 Q37 195 75 205 T150 205 T225 205 T300 205"/>
+            </svg>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="steps" id="order">
+      <div class="section-head reveal">
+        <p class="eyebrow">How to order</p>
+        <h2>Simple, personal, on WhatsApp</h2>
+        <div class="gold-rule"><span></span></div>
+      </div>
+      <ol class="step-list">
+        <li class="reveal"><span class="step-n">I</span><h3>Choose your pieces</h3><p>Add what you love to your bag. Prices are in QAR.</p></li>
+        <li class="reveal"><span class="step-n">II</span><h3>Send on WhatsApp</h3><p>Your order is written out for you. Just press send.</p></li>
+        <li class="reveal"><span class="step-n">III</span><h3>We confirm &amp; deliver</h3><p>We reply to confirm, then arrange delivery or a viewing. Pay cash or bank transfer.</p></li>
+      </ol>
+    </section>
+  </main>
+
+  <footer class="foot">
+    <div class="foot-brand">
+      <span class="brand-mark" aria-hidden="true"></span>
+      <p class="brand-text">Pasttimes <em>Gems</em></p>
+      <p class="foot-ar" lang="ar">جواهر الزمن الجميل</p>
+    </div>
+    <div class="foot-links">
+      <a id="footWa" href="#" target="_blank" rel="noopener">WhatsApp</a>
+      <a id="footIg" href="#" target="_blank" rel="noopener" hidden>Instagram</a>
+      <span id="footLoc">Doha, Qatar</span>
+    </div>
+    <p class="foot-small">© <span id="year"></span> Pasttimes Gems · All prices in Qatari riyal (QAR)</p>
+  </footer>
+
+  <!-- Product detail -->
+  <dialog class="modal" id="productModal" aria-labelledby="pmName">
+    <button class="x" data-close aria-label="Close">×</button>
+    <div class="pm">
+      <div class="pm-media"><img id="pmImg" alt=""></div>
+      <div class="pm-info">
+        <p class="eyebrow" id="pmCat"></p>
+        <h2 id="pmName"></h2>
+        <p class="pm-price" id="pmPrice"></p>
+        <p class="pm-desc" id="pmDesc"></p>
+        <dl class="pm-specs" id="pmSpecs"></dl>
+        <div class="pm-actions">
+          <div class="qty" aria-label="Quantity">
+            <button data-q="-1" aria-label="Fewer">−</button><output id="pmQty">1</output><button data-q="1" aria-label="More">+</button>
+          </div>
+          <button class="btn btn-gold" id="pmAdd">Add to bag</button>
+        </div>
+        <a class="pm-ask" id="pmAsk" href="#" target="_blank" rel="noopener">Ask about this piece on WhatsApp</a>
+      </div>
+    </div>
+  </dialog>
+
+  <!-- Bag drawer -->
+  <div class="scrim" id="scrim" hidden></div>
+  <aside class="drawer" id="drawer" aria-label="Your bag" aria-hidden="true">
+    <header class="drawer-head">
+      <h2>Your bag</h2>
+      <button class="x" id="drawerClose" aria-label="Close bag">×</button>
+    </header>
+    <div class="drawer-body">
+      <ul class="bag-list" id="bagList"></ul>
+      <div class="bag-empty" id="bagEmpty">
+        <span class="spinner-pearl still"></span>
+        <p>Your bag is waiting for its first treasure.</p>
+        <a class="btn btn-ghost" href="#collection" data-close-drawer>Browse the collection</a>
+      </div>
+      <form class="checkout" id="checkout" hidden>
+        <div class="total-row"><span>Total</span><strong id="bagTotal">QAR 0</strong></div>
+        <p class="hint">Fill in your details and we will prepare the WhatsApp message.</p>
+        <label>Full name<input name="name" required autocomplete="name"></label>
+        <label>Phone<input name="phone" required inputmode="tel" autocomplete="tel" placeholder="+974"></label>
+        <label>Delivery
+          <select name="delivery">
+            <option>Home delivery in Doha</option>
+            <option>Pick up / private viewing</option>
+          </select>
+        </label>
+        <label>Area / address<input name="address" autocomplete="street-address" placeholder="e.g. West Bay, Zone 61"></label>
+        <label>Notes<textarea name="notes" rows="2" placeholder="Ring size, gift wrap, best time to call…"></textarea></label>
+        <button class="btn btn-wa" type="submit">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2Zm5.3 14.1c-.2.6-1.3 1.2-1.8 1.2-.5.1-1 .2-3.4-.7-2.8-1.1-4.6-4-4.8-4.2-.1-.2-1.1-1.5-1.1-2.9s.7-2.1 1-2.4c.3-.3.6-.3.8-.3h.6c.2 0 .4 0 .6.5l.9 2.1c.1.2.1.4 0 .6l-.4.6-.4.5c-.1.1-.3.3-.1.6.2.3.8 1.4 1.8 2.2 1.2 1.1 2.2 1.4 2.5 1.6.3.1.5.1.7-.1l.9-1.1c.2-.3.4-.2.7-.1l2 1c.3.1.5.2.5.3.1.2.1.7-.1 1.4Z"/></svg>
+          Send order on WhatsApp
+        </button>
+        <p class="hint small">No online payment. We confirm your order on WhatsApp first.</p>
+      </form>
+    </div>
+  </aside>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script type="module" src="assets/js/shop.js"></script>
+</body>
+</html>
