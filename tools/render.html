@@ -1,0 +1,76 @@
+<!doctype html>
+<!-- Renders the catalogue artwork in assets/art/ from assets/js/jewels3d.js.
+     Open through any local web server; each image appears with a download link. -->
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Render artwork</title>
+  <script type="importmap">{ "imports": { "three": "https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.module.min.js" } }</script>
+  <style>body{background:#111;color:#ddd;font:14px system-ui;display:flex;flex-wrap:wrap;gap:12px;padding:12px}figure{margin:0}img{width:220px;display:block}</style>
+</head>
+<body>
+<script type="module">
+  import { ART, stage, makeRenderer, setupStudio, heroPiece } from '../assets/js/jewels3d.js';
+
+  const SIZE = 900;
+  const canvas = document.createElement('canvas');
+  canvas.width = canvas.height = SIZE;
+  const renderer = makeRenderer(canvas, { alpha: true, preserve: true });
+  renderer.setSize(SIZE, SIZE, false);
+  setupStudio(renderer);
+
+  // Turntable angle and camera height per artwork, so each piece shows its best side.
+  const POSE = {
+    'gems:0': { tilt: .95, turn: .2, distance: 6.4 }, 'gems:1': { tilt: .95, turn: .3, distance: 6.4 }, 'gems:2': { tilt: .95, turn: .3, distance: 6.4 }, 'gems:3': { tilt: .95, turn: .1, distance: 6.4 }, 'gems:4': { tilt: .95, turn: .1, distance: 6.4 }, 'gems:5': { tilt: .95, turn: .2, distance: 6.4 },
+    'pearls:0': { tilt: .95, turn: 0 }, 'pearls:1': { tilt: .12, turn: 0 }, 'pearls:2': { tilt: .3, turn: 0 }, 'pearls:3': { tilt: .35, turn: .3 },
+    'jewellery:0': { tilt: .32, turn: .5 }, 'jewellery:1': { tilt: .4, turn: .5 }, 'jewellery:2': { tilt: .5, turn: .5 }, 'jewellery:3': { tilt: .3, turn: .5 },
+  };
+
+  function backdrop(ctx) {
+    const g = ctx.createRadialGradient(SIZE / 2, SIZE * .42, 0, SIZE / 2, SIZE * .5, SIZE * .75);
+    g.addColorStop(0, '#2a2622'); g.addColorStop(.55, '#171513'); g.addColorStop(1, '#0b0a09');
+    ctx.fillStyle = g;
+    ctx.fillRect(0, 0, SIZE, SIZE);
+  }
+
+  window.renderAll = async (only = '') => {
+    const out = {};
+    for (const [cat, list] of Object.entries(ART)) {
+      for (let i = 0; i < list.length; i++) {
+        const key = `${cat}:${i}`;
+        if (only && !key.startsWith(only)) continue;
+        const pose = POSE[key] || { tilt: .5, turn: .35 };
+        const obj = list[i]();
+        obj.rotation.y = pose.turn;
+        const { scene, camera } = stage(renderer, obj, { tilt: pose.tilt, distance: pose.distance });
+        renderer.render(scene, camera);
+        const c2 = document.createElement('canvas');
+        c2.width = c2.height = SIZE;
+        const ctx = c2.getContext('2d');
+        backdrop(ctx);
+        ctx.drawImage(canvas, 0, 0);
+        out[`${cat}-${i}`] = c2.toDataURL('image/webp', .86);
+        const fig = document.createElement('figure');
+        fig.innerHTML = `<img src="${out[`${cat}-${i}`]}"><figcaption>${cat}-${i}</figcaption>`;
+        document.body.append(fig);
+      }
+    }
+    return out;
+  };
+  // The hero poster, on a transparent background, shown until the live scene is ready.
+  window.renderHero = () => {
+    renderer.shadowMap.enabled = false;
+    const piece = heroPiece();
+    const { scene, camera } = stage(renderer, piece, { tilt: .18, distance: 6.4, shadow: false });
+    piece.userData.update(0);
+    renderer.setClearColor(0x000000, 0);
+    renderer.render(scene, camera);
+    const url = canvas.toDataURL('image/webp', .9);
+    document.body.insertAdjacentHTML('beforeend', `<figure><img src="${url}"><figcaption>hero</figcaption></figure>`);
+    renderer.shadowMap.enabled = true;
+    return { hero: url };
+  };
+  if (!navigator.webdriver) { renderAll(); renderHero(); }
+</script>
+</body>
+</html>
