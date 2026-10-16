@@ -1,6 +1,6 @@
-# Pasttimes Gems
+# Past Times Gems
 
-Website for **Pasttimes Gems**, Doha: jewellery, gems and pearls.
+Website for **Past Times Gems**, Doha: jewellery, gems and pearls.
 
 - **Customer shop** (`index.html`): an animated showroom inspired by Qatar's
   pearling heritage. Customers browse by category, search, view each piece, add

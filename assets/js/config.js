@@ -6,7 +6,7 @@
 // sample products are shown and admin changes are kept only in your browser.
 
 export const CONFIG = {
-  shopName: 'Pasttimes Gems',
+  shopName: 'Past Times Gems',
   tagline: 'Jewellery · Gems · Pearls',
   location: 'Doha, Qatar',
 

@@ -1,4 +1,4 @@
--- Pasttimes Gems database setup.
+-- Past Times Gems database setup.
 -- Paste this whole file into Supabase → SQL Editor → New query, then press Run.
 -- It is safe to run again; it only creates what is missing.
 

@@ -3,10 +3,11 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Pasttimes Gems · Jewellery, Gems &amp; Pearls in Doha</title>
-  <meta name="description" content="Pasttimes Gems, Doha: natural pearls, precious gems and handcrafted jewellery. Browse the collection and order on WhatsApp.">
+  <title>Past Times Gems · Jewellery, Gems &amp; Pearls in Doha</title>
+  <meta name="description" content="Past Times Gems, Doha: natural pearls, precious gems and handcrafted jewellery. Browse the collection and order on WhatsApp.">
   <meta name="theme-color" content="#06131a">
-  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+  <link rel="icon" href="assets/brand/favicon.png" type="image/png">
+  <link rel="apple-touch-icon" href="assets/brand/apple-touch-icon.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Jost:wght@300;400;500&family=Amiri:wght@400&display=swap" rel="stylesheet">
@@ -17,19 +18,25 @@
   <div class="announce" id="announce" hidden></div>
 
   <header class="top" id="top">
-    <a class="brand" href="#home" aria-label="Pasttimes Gems home">
-      <span class="brand-mark" aria-hidden="true"></span>
-      <span class="brand-text">Pasttimes <em>Gems</em></span>
+    <a class="brand" href="#home" aria-label="Past Times Gems home">
+      <img class="brand-logo" src="assets/brand/logo-mark.png" alt="" width="44" height="44">
+      <span class="brand-text">Past Times <em>Gems</em></span>
     </a>
     <nav class="nav" aria-label="Main">
       <a href="#collection">Collection</a>
       <a href="#heritage">Heritage</a>
       <a href="#order">How to order</a>
     </nav>
+    <div class="top-actions">
+    <button class="bag-btn saved-btn" id="savedBtn" aria-label="Show saved pieces">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20.5S3 15 3 9a4.5 4.5 0 0 1 9-1 4.5 4.5 0 0 1 9 1c0 6-9 11.5-9 11.5Z"/></svg>
+      <span class="bag-count" id="savedCount">0</span>
+    </button>
     <button class="bag-btn" id="bagBtn" aria-label="Open your bag">
       <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 8h12l-1 12H7L6 8Z"/><path d="M9 8a3 3 0 0 1 6 0"/></svg>
       <span class="bag-count" id="bagCount">0</span>
     </button>
+    </div>
   </header>
 
   <main>
@@ -62,10 +69,31 @@
       </div>
     </div>
 
+    <ul class="perks" aria-label="Shopping with us">
+      <li><span class="perk-gem" aria-hidden="true"></span>Prices in Qatari riyal</li>
+      <li><span class="perk-gem" aria-hidden="true"></span>Delivery across Doha</li>
+      <li><span class="perk-gem" aria-hidden="true"></span>Order in one tap on WhatsApp</li>
+      <li><span class="perk-gem" aria-hidden="true"></span>Private viewings on request</li>
+    </ul>
+
     <section class="cats" aria-label="Shop by category">
       <button class="cat reveal" data-cat="jewellery"><img alt="" data-art="jewellery:-1"><span class="cat-name">Jewellery</span><span class="cat-note">Rings, necklaces &amp; more</span></button>
       <button class="cat reveal" data-cat="gems"><img alt="" data-art="gems:0"><span class="cat-name">Gems</span><span class="cat-note">Loose precious stones</span></button>
       <button class="cat reveal" data-cat="pearls"><img alt="" data-art="pearls:0"><span class="cat-name">Pearls</span><span class="cat-note">From the sea, by hand</span></button>
+    </section>
+
+    <section class="spotlight" id="spotlight" hidden>
+      <div class="section-head reveal">
+        <p class="eyebrow">In the spotlight</p>
+        <h2>Pieces we <em>love</em> right now</h2>
+        <div class="gold-rule"><span></span></div>
+      </div>
+      <div class="spot-stage" id="spotStage">
+        <button class="spot-nav prev" id="spotPrev" aria-label="Previous piece">‹</button>
+        <div class="spot-track" id="spotTrack" aria-live="polite"></div>
+        <button class="spot-nav next" id="spotNext" aria-label="Next piece">›</button>
+      </div>
+      <div class="spot-dots" id="spotDots" role="tablist" aria-label="Spotlight pieces"></div>
     </section>
 
     <section class="collection" id="collection">
@@ -81,6 +109,7 @@
           <button class="chip" data-filter="jewellery" role="tab" aria-selected="false">Jewellery</button>
           <button class="chip" data-filter="gems" role="tab" aria-selected="false">Gems</button>
           <button class="chip" data-filter="pearls" role="tab" aria-selected="false">Pearls</button>
+          <button class="chip chip-saved" data-filter="saved" role="tab" aria-selected="false" hidden>♥ Saved</button>
         </div>
         <div class="tools">
           <label class="search"><span class="sr">Search</span>
@@ -112,7 +141,7 @@
           <p class="eyebrow">Our heritage</p>
           <h2>Born of the sea, <em>kept by hand</em></h2>
           <p>Long before the towers of West Bay, Qatar's fortune came from the sea. Divers left on dhows each summer, holding their breath for the pearls hidden in Gulf oysters.</p>
-          <p>Pasttimes Gems carries that patience forward. Every pearl, stone and setting is chosen by eye, described honestly, and handed over in person here in Doha.</p>
+          <p>Past Times Gems carries that patience forward. Every pearl, stone and setting is chosen by eye, described honestly, and handed over in person here in Doha.</p>
           <ul class="promises">
             <li><span>✦</span>Every piece described honestly</li>
             <li><span>✦</span>Prices shown in Qatari riyal</li>
@@ -148,8 +177,7 @@
 
   <footer class="foot">
     <div class="foot-brand">
-      <span class="brand-mark" aria-hidden="true"></span>
-      <p class="brand-text">Pasttimes <em>Gems</em></p>
+      <img class="foot-logo" src="assets/brand/logo.png" alt="Past Times Gems" width="160" height="196" loading="lazy">
       <p class="foot-ar" lang="ar">جواهر الزمن الجميل</p>
     </div>
     <div class="foot-links">
@@ -157,14 +185,14 @@
       <a id="footIg" href="#" target="_blank" rel="noopener" hidden>Instagram</a>
       <span id="footLoc">Doha, Qatar</span>
     </div>
-    <p class="foot-small">© <span id="year"></span> Pasttimes Gems · All prices in Qatari riyal (QAR)</p>
+    <p class="foot-small">© <span id="year"></span> Past Times Gems · All prices in Qatari riyal (QAR)</p>
   </footer>
 
   <!-- Product detail -->
   <dialog class="modal" id="productModal" aria-labelledby="pmName">
     <button class="x" data-close aria-label="Close">×</button>
     <div class="pm">
-      <div class="pm-media"><img id="pmImg" alt=""></div>
+      <div class="pm-media" id="pmMedia"><img id="pmImg" alt=""><span class="zoom-hint">Hover to zoom</span></div>
       <div class="pm-info">
         <p class="eyebrow" id="pmCat"></p>
         <h2 id="pmName"></h2>
@@ -176,9 +204,14 @@
             <button data-q="-1" aria-label="Fewer">−</button><output id="pmQty">1</output><button data-q="1" aria-label="More">+</button>
           </div>
           <button class="btn btn-gold" id="pmAdd">Add to bag</button>
+          <button class="heart pm-heart" id="pmHeart" aria-label="Save this piece" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20.5S3 15 3 9a4.5 4.5 0 0 1 9-1 4.5 4.5 0 0 1 9 1c0 6-9 11.5-9 11.5Z"/></svg></button>
         </div>
         <a class="pm-ask" id="pmAsk" href="#" target="_blank" rel="noopener">Ask about this piece on WhatsApp</a>
       </div>
+    </div>
+    <div class="pm-more" id="pmMore" hidden>
+      <p class="eyebrow">You may also like</p>
+      <div class="pm-more-list" id="pmMoreList"></div>
     </div>
   </dialog>
 
@@ -217,6 +250,11 @@
       </form>
     </div>
   </aside>
+
+  <button class="bag-bar" id="bagBar" hidden>
+    <span class="bag-bar-info"><span id="bagBarCount">0 pieces</span><strong id="bagBarTotal">QAR 0</strong></span>
+    <span class="bag-bar-cta">View bag</span>
+  </button>
 
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
