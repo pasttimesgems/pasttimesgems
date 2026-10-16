@@ -5,12 +5,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Past Times Gems · Jewellery, Gems &amp; Pearls in Doha</title>
   <meta name="description" content="Past Times Gems, Doha: natural pearls, precious gems and handcrafted jewellery. Browse the collection and order on WhatsApp.">
-  <meta name="theme-color" content="#0d0c0b">
+  <meta name="theme-color" content="#081413">
   <link rel="icon" href="assets/brand/favicon.png" type="image/png">
   <link rel="apple-touch-icon" href="assets/brand/apple-touch-icon.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Jost:wght@300;400;500&family=Tajawal:wght@300;400;500&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Manrope:wght@300;400;500;600&family=Tajawal:wght@300;400;500&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="assets/css/shop.css">
   <script>
     // Set language and direction before paint.
@@ -49,20 +49,31 @@
 
   <main>
     <section class="hero" id="home">
-      <div class="hero-copy">
-        <p class="eyebrow" data-i18n="hero.eyebrow">Fine pearls · Precious stones · Doha</p>
-        <h1 class="hero-title" data-i18n-html="hero.title">Natural pearls, precious stones and <em>fine jewellery</em></h1>
-        <p class="hero-sub" data-i18n="hero.sub">A private collection in Doha. Every piece is chosen by hand, described honestly and delivered in person.</p>
-        <div class="hero-cta">
+      <div class="hero-bg" aria-hidden="true">
+        <span class="orb o1" data-speed=".35"></span>
+        <span class="orb o2" data-speed=".2"></span>
+        <span class="orb o3" data-speed=".5"></span>
+        <svg class="rings" data-speed=".12" viewBox="-300 -300 600 600"><circle r="150"/><circle r="200"/><circle r="252"/><circle r="296"/></svg>
+      </div>
+      <div class="hero-inner">
+        <img class="hero-logo" src="assets/brand/logo.png" alt="Past Times Gems" width="200" height="245">
+        <p class="eyebrow hero-step" data-i18n="hero.eyebrow">Fine pearls · Precious stones · Doha</p>
+        <h1 class="hero-title hero-step" data-i18n-html="hero.title">Natural pearls, precious stones and <em>fine jewellery</em></h1>
+        <p class="hero-sub hero-step" data-i18n="hero.sub">A private collection in Doha. Every piece is chosen by hand, described honestly and delivered in person.</p>
+        <div class="hero-cta hero-step">
           <a class="btn btn-gold" href="#collection" data-i18n="hero.cta">View the collection</a>
           <a class="btn btn-line" id="heroWa" href="#" target="_blank" rel="noopener" data-i18n="hero.wa">Speak to us on WhatsApp</a>
         </div>
       </div>
-      <div class="medallion" aria-hidden="true">
-        <svg class="guilloche" id="heroGuilloche" viewBox="-300 -300 600 600"></svg>
-        <img class="medallion-logo" src="assets/brand/logo.png" alt="" width="200" height="245">
-      </div>
+      <a class="scroll-cue" href="#collection" data-i18n-aria="hero.scroll" aria-label="Scroll to collection"><span></span></a>
     </section>
+
+    <div class="ribbon" aria-hidden="true">
+      <div class="ribbon-track">
+        <span data-i18n="marquee.a">Natural pearls</span><i></i><span data-i18n="marquee.b">Precious gems</span><i></i><span data-i18n="marquee.c">Handcrafted jewellery</span><i></i><span data-i18n="perk.2">Delivery across Doha</span><i></i>
+        <span data-i18n="marquee.a">Natural pearls</span><i></i><span data-i18n="marquee.b">Precious gems</span><i></i><span data-i18n="marquee.c">Handcrafted jewellery</span><i></i><span data-i18n="perk.2">Delivery across Doha</span><i></i>
+      </div>
+    </div>
 
     <ul class="perks" aria-label="Shopping with us">
       <li><span data-i18n="perk.1">Prices in Qatari riyal</span></li>
@@ -72,9 +83,9 @@
     </ul>
 
     <section class="cats" aria-label="Shop by category">
-      <button class="cat reveal" data-cat="pearls"><span class="cat-n">I</span><span class="cat-name" data-i18n="cat.pearls">Pearls</span><span class="cat-note" data-i18n="catnote.pearls">Natural and cultured, strands and single pearls</span><span class="cat-go" data-i18n="cat.shop">Shop</span></button>
-      <button class="cat reveal" data-cat="gems"><span class="cat-n">II</span><span class="cat-name" data-i18n="cat.gems">Gems</span><span class="cat-note" data-i18n="catnote.gems">Loose precious stones with reports</span><span class="cat-go" data-i18n="cat.shop">Shop</span></button>
-      <button class="cat reveal" data-cat="jewellery"><span class="cat-n">III</span><span class="cat-name" data-i18n="cat.jewellery">Jewellery</span><span class="cat-note" data-i18n="catnote.jewellery">Rings, necklaces and earrings in gold</span><span class="cat-go" data-i18n="cat.shop">Shop</span></button>
+      <button class="cat reveal" data-cat="pearls"><svg class="cat-icon" viewBox="0 0 48 48" aria-hidden="true"><circle cx="24" cy="24" r="13"/><path d="M16.5 19a9 9 0 0 1 6-5.5"/></svg><span class="cat-n">I</span><span class="cat-name" data-i18n="cat.pearls">Pearls</span><span class="cat-note" data-i18n="catnote.pearls">Natural and cultured, strands and single pearls</span><span class="cat-go" data-i18n="cat.shop">Shop</span></button>
+      <button class="cat reveal" data-cat="gems"><svg class="cat-icon" viewBox="0 0 48 48" aria-hidden="true"><path d="M9 19 15 11h18l6 8-15 19Z M9 19h30 M15 11l4.5 8L24 11l4.5 8L33 11 M19.5 19 24 38l4.5-19"/></svg><span class="cat-n">II</span><span class="cat-name" data-i18n="cat.gems">Gems</span><span class="cat-note" data-i18n="catnote.gems">Loose precious stones with reports</span><span class="cat-go" data-i18n="cat.shop">Shop</span></button>
+      <button class="cat reveal" data-cat="jewellery"><svg class="cat-icon" viewBox="0 0 48 48" aria-hidden="true"><ellipse cx="24" cy="29" rx="12.5" ry="11.5"/><path d="M19 15.5 21.5 10h5l2.5 5.5Z"/></svg><span class="cat-n">III</span><span class="cat-name" data-i18n="cat.jewellery">Jewellery</span><span class="cat-note" data-i18n="catnote.jewellery">Rings, necklaces and earrings in gold</span><span class="cat-go" data-i18n="cat.shop">Shop</span></button>
     </section>
 
     <section class="spotlight" id="spotlight" hidden>
@@ -128,7 +139,7 @@
 
     <section class="heritage" id="heritage">
       <div class="heritage-inner">
-        <div class="heritage-text reveal">
+        <div class="heritage-text reveal from-left">
           <p class="eyebrow" data-i18n="her.eyebrow">Our heritage</p>
           <h2 data-i18n-html="her.title">Born of the sea, <em>kept by hand</em></h2>
           <p data-i18n="her.p1">Long before the towers of West Bay, Qatar's fortune came from the sea. Divers left on dhows each summer, holding their breath for the pearls hidden in Gulf oysters.</p>
@@ -139,7 +150,7 @@
             <li><b data-i18n="her.l3">Personal delivery or viewing in Doha</b></li>
           </ul>
         </div>
-        <blockquote class="heritage-quote reveal">
+        <blockquote class="heritage-quote reveal from-right">
           <p data-i18n="her.quote">“Pearls were Qatar’s first treasure. We choose each one as carefully as the divers who found them.”</p>
         </blockquote>
       </div>

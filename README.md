@@ -26,8 +26,8 @@ you can try everything. On the admin page use any email and the password `demo`.
 | `admin.html`, `assets/css/admin.css`, `assets/js/admin.js` | Admin page |
 | `assets/js/config.js` | Shop name, Supabase keys, WhatsApp number |
 | `assets/js/store.js` | Talks to Supabase (or the demo store) |
-| `assets/js/effects.js` | Scroll fade-ins |
-| `assets/js/guilloche.js` | Engraved line pattern behind the logo |
+| `assets/js/effects.js` | Sliding scroll reveals and the hero parallax |
+| `assets/js/guilloche.js` | Engraved line pattern used by the placeholders |
 | `assets/js/art.js` | Engraved placeholder for pieces without a photo |
 | `supabase/schema.sql` | Database tables and security rules |
 
