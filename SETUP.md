@@ -1,4 +1,4 @@
-# Setting up Pasttimes Gems (free)
+# Setting up Past Times Gems (free)
 
 The site works straight away in **demo mode** with sample products. To let the
 shop's staff add real products that every customer sees, connect it to a free

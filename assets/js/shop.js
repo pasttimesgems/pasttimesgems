@@ -15,6 +15,13 @@ let bag = [];
 try { bag = JSON.parse(localStorage.getItem(BAG_KEY)) || []; } catch { bag = []; }
 const saveBag = () => { try { localStorage.setItem(BAG_KEY, JSON.stringify(bag)); } catch { /* private mode */ } };
 
+// ---------- saved pieces (wishlist, this browser only) ----------
+const SAVED_KEY = 'ptg-saved-v1';
+let saved = new Set();
+try { saved = new Set(JSON.parse(localStorage.getItem(SAVED_KEY)) || []); } catch { saved = new Set(); }
+const persistSaved = () => { try { localStorage.setItem(SAVED_KEY, JSON.stringify([...saved])); } catch { /* private mode */ } };
+const HEART = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20.5S3 15 3 9a4.5 4.5 0 0 1 9-1 4.5 4.5 0 0 1 9 1c0 6-9 11.5-9 11.5Z"/></svg>';
+
 // ---------- boot ----------
 seaCanvas($('#sea'));
 pointerTrail();
@@ -50,6 +57,11 @@ async function init() {
     return p && p.status !== 'sold';
   });
   saveBag();
+  saved = new Set([...saved].filter((id) => products.some((p) => p.id === id)));
+  persistSaved();
+  renderCounts();
+  renderSaved();
+  renderSpotlight();
   renderGrid();
   renderBag();
   openFromHash();
@@ -77,7 +89,7 @@ function waLink(text) {
 function visibleProducts() {
   const q = state.query.trim().toLowerCase();
   let list = state.products.filter((p) =>
-    (state.filter === 'all' || p.category === state.filter) &&
+    (state.filter === 'all' || p.category === state.filter || (state.filter === 'saved' && saved.has(p.id))) &&
     (!q || [p.name, p.description, p.material, p.origin].join(' ').toLowerCase().includes(q)));
   const sorters = {
     featured: (a, b) => (b.featured - a.featured) || ((a.status === 'sold') - (b.status === 'sold')),
@@ -92,7 +104,8 @@ function renderGrid() {
   const grid = $('#grid');
   const list = visibleProducts();
   if (!list.length) {
-    grid.innerHTML = `<p class="empty">${state.products.length ? 'No pieces match that search.' : 'New pieces are being polished. Please check back soon.'}</p>`;
+    grid.innerHTML = `<p class="empty">${!state.products.length ? 'New pieces are being polished. Please check back soon.'
+      : state.filter === 'saved' ? 'Tap the heart on any piece to save it here.' : 'No pieces match that search.'}</p>`;
     return;
   }
   grid.innerHTML = list.map((p, i) => {
@@ -102,10 +115,16 @@ function renderGrid() {
       : p.featured ? '<span class="badge featured">✦ Featured</span>' : '';
     return `
     <article class="card${sold ? ' is-sold' : ''}" data-id="${escapeHtml(p.id)}" tabindex="0" style="--d:${Math.min(i, 8) * 0.07}s" aria-label="${escapeHtml(p.name)}">
-      <div class="card-media">${badge}<img src="${escapeHtml(imageSrc(p))}" alt="${escapeHtml(p.name)}" loading="lazy"></div>
+      <div class="card-media">${badge}
+        <button class="heart" data-heart="${escapeHtml(p.id)}" aria-label="Save ${escapeHtml(p.name)}" aria-pressed="${saved.has(p.id)}">${HEART}</button>
+        <img src="${escapeHtml(imageSrc(p))}" alt="${escapeHtml(p.name)}" loading="lazy">
+        <span class="quick">Quick view</span>
+        <span class="glint" aria-hidden="true"></span>
+      </div>
       <div class="card-body">
         <span class="card-cat">${escapeHtml(catLabel(p.category))}</span>
         <h3 class="card-name">${escapeHtml(p.name)}</h3>
+        ${specLine(p) ? `<p class="card-spec">${escapeHtml(specLine(p))}</p>` : ''}
         <div class="card-foot">
           <span class="price">${money(p.price)}</span>
           <button class="add" data-add="${escapeHtml(p.id)}" aria-label="Add ${escapeHtml(p.name)} to bag" ${sold ? 'disabled' : ''}>+</button>
@@ -118,7 +137,116 @@ function renderGrid() {
   reveal(cards);
 }
 
+function specLine(p) { return [p.weight, p.origin].filter(Boolean).join(' · '); }
+
+function renderCounts() {
+  for (const chip of $$('.chip')) {
+    const f = chip.dataset.filter;
+    if (f === 'saved') continue;
+    const n = f === 'all' ? state.products.length : state.products.filter((p) => p.category === f).length;
+    chip.dataset.count = n;
+  }
+}
+
+// ---------- saved pieces ----------
+function toggleSaved(id, fromEl) {
+  const on = !saved.has(id);
+  on ? saved.add(id) : saved.delete(id);
+  persistSaved();
+  $$(`[data-heart="${CSS.escape(id)}"]`).forEach((h) => h.setAttribute('aria-pressed', on));
+  if (current?.id === id) $('#pmHeart').setAttribute('aria-pressed', on);
+  if (on && fromEl) {
+    const r = fromEl.getBoundingClientRect();
+    sparkle(r.left + r.width / 2, r.top + r.height / 2, 8, 36);
+  }
+  renderSaved();
+  if (state.filter === 'saved') renderGrid();
+  const p = state.products.find((x) => x.id === id);
+  toast(on ? `${p?.name || 'Piece'} saved` : 'Removed from saved');
+}
+
+function renderSaved() {
+  const n = saved.size;
+  const c = $('#savedCount');
+  c.textContent = n;
+  c.classList.toggle('has', n > 0);
+  const chip = $('.chip-saved');
+  chip.hidden = n === 0;
+  chip.dataset.count = n;
+  if (!n && state.filter === 'saved') setFilter('all');
+}
+
+$('#savedBtn').addEventListener('click', () => {
+  if (!saved.size) { toast('Tap the heart on any piece to save it.'); return; }
+  setFilter('saved');
+  $('#collection').scrollIntoView({ behavior: reducedMotion ? 'auto' : 'smooth' });
+});
+
+// ---------- spotlight carousel ----------
+let spotIndex = 0, spotTimer = null, spotItems = [];
+
+function renderSpotlight() {
+  const featured = state.products.filter((p) => p.featured && p.status !== 'sold');
+  spotItems = (featured.length ? featured : state.products.filter((p) => p.status === 'available')).slice(0, 6);
+  if (spotItems.length < 2) return;
+  $('#spotlight').hidden = false;
+  reveal($$('#spotlight .reveal'));
+  $('#spotTrack').innerHTML = spotItems.map((p, i) => `
+    <article class="spot${i === 0 ? ' is-on' : ''}" data-id="${escapeHtml(p.id)}" aria-hidden="${i !== 0}">
+      <div class="spot-art">
+        <span class="beams" aria-hidden="true"></span>
+        <img src="${escapeHtml(imageSrc(p))}" alt="${escapeHtml(p.name)}">
+        <span class="pedestal" aria-hidden="true"></span>
+      </div>
+      <div class="spot-copy">
+        <span class="card-cat">${escapeHtml(catLabel(p.category))}</span>
+        <h3>${escapeHtml(p.name)}</h3>
+        <p class="spot-desc">${escapeHtml(p.description || '')}</p>
+        ${specLine(p) ? `<p class="card-spec">${escapeHtml(specLine(p))}</p>` : ''}
+        <p class="price">${money(p.price)}</p>
+        <div class="spot-actions">
+          <button class="btn btn-gold" data-add="${escapeHtml(p.id)}">Add to bag</button>
+          <button class="btn btn-ghost" data-view="${escapeHtml(p.id)}">View details</button>
+        </div>
+      </div>
+    </article>`).join('');
+  $('#spotDots').innerHTML = spotItems.map((p, i) =>
+    `<button class="spot-dot${i === 0 ? ' is-on' : ''}" data-i="${i}" role="tab" aria-label="${escapeHtml(p.name)}" aria-selected="${i === 0}"><span></span></button>`).join('');
+  startSpot();
+}
+
+function showSpot(i) {
+  spotIndex = (i + spotItems.length) % spotItems.length;
+  $$('.spot').forEach((el, n) => { el.classList.toggle('is-on', n === spotIndex); el.setAttribute('aria-hidden', n !== spotIndex); });
+  $$('.spot-dot').forEach((el, n) => { el.classList.toggle('is-on', n === spotIndex); el.setAttribute('aria-selected', n === spotIndex); });
+}
+function startSpot() {
+  clearInterval(spotTimer);
+  if (!reducedMotion) spotTimer = setInterval(() => showSpot(spotIndex + 1), 6500);
+}
+$('#spotPrev').addEventListener('click', () => { showSpot(spotIndex - 1); startSpot(); });
+$('#spotNext').addEventListener('click', () => { showSpot(spotIndex + 1); startSpot(); });
+$('#spotDots').addEventListener('click', (e) => { const d = e.target.closest('[data-i]'); if (d) { showSpot(Number(d.dataset.i)); startSpot(); } });
+$('#spotStage').addEventListener('pointerenter', () => clearInterval(spotTimer));
+$('#spotStage').addEventListener('pointerleave', startSpot);
+$('#spotTrack').addEventListener('click', (e) => {
+  const add = e.target.closest('[data-add]');
+  if (add) { addToBag(add.dataset.add, 1, add); return; }
+  const view = e.target.closest('[data-view]') || e.target.closest('.spot-art');
+  if (view) openProduct(view.dataset.view || view.closest('.spot').dataset.id);
+});
+let touchX = null;
+$('#spotTrack').addEventListener('touchstart', (e) => { touchX = e.touches[0].clientX; }, { passive: true });
+$('#spotTrack').addEventListener('touchend', (e) => {
+  if (touchX === null) return;
+  const dx = e.changedTouches[0].clientX - touchX;
+  if (Math.abs(dx) > 40) { showSpot(spotIndex + (dx < 0 ? 1 : -1)); startSpot(); }
+  touchX = null;
+});
+
 $('#grid').addEventListener('click', (e) => {
+  const heart = e.target.closest('[data-heart]');
+  if (heart) { toggleSaved(heart.dataset.heart, heart); return; }
   const add = e.target.closest('[data-add]');
   if (add) { addToBag(add.dataset.add, 1, add); return; }
   const card = e.target.closest('.card');
@@ -173,8 +301,21 @@ function openProduct(id) {
   $('#pmAdd').disabled = sold;
   $('#pmAdd').textContent = sold ? 'Sold' : 'Add to bag';
   $('#pmAsk').href = waLink(`Hello ${CONFIG.shopName}, I'm interested in "${p.name}" (${money(p.price)}). Is it available?\n${productUrl(p)}`);
+  $('#pmHeart').setAttribute('aria-pressed', saved.has(p.id));
+  const more = state.products
+    .filter((x) => x.id !== p.id && x.status !== 'sold')
+    .sort((a, b) => (b.category === p.category) - (a.category === p.category) || Math.abs(a.price - p.price) - Math.abs(b.price - p.price))
+    .slice(0, 3);
+  $('#pmMore').hidden = !more.length;
+  $('#pmMoreList').innerHTML = more.map((x) => `
+    <button class="mini" data-open="${escapeHtml(x.id)}">
+      <img src="${escapeHtml(imageSrc(x))}" alt="">
+      <span class="mini-name">${escapeHtml(x.name)}</span>
+      <span class="price">${money(x.price)}</span>
+    </button>`).join('');
   history.replaceState(null, '', `#piece-${p.id}`);
-  modal.showModal();
+  if (!modal.open) modal.showModal();
+  modal.scrollTop = 0;
 }
 function productUrl(p) { return `${location.origin}${location.pathname}#piece-${p.id}`; }
 function openFromHash() {
@@ -186,9 +327,27 @@ modal.addEventListener('close', () => {
 });
 modal.addEventListener('click', (e) => {
   if (e.target === modal || e.target.closest('[data-close]')) modal.close();
+  const more = e.target.closest('[data-open]');
+  if (more) { openProduct(more.dataset.open); return; }
   const q = e.target.closest('[data-q]');
   if (q) { qty = Math.max(1, Math.min(20, qty + Number(q.dataset.q))); $('#pmQty').textContent = qty; }
 });
+$('#pmHeart').addEventListener('click', (e) => { if (current) toggleSaved(current.id, e.currentTarget); });
+
+// Magnifier: the photo follows the pointer at 2x so customers can see the detail.
+const pmMedia = $('#pmMedia');
+if (matchMedia('(pointer: fine)').matches) {
+  pmMedia.addEventListener('pointermove', (e) => {
+    const r = pmMedia.getBoundingClientRect();
+    pmMedia.style.setProperty('--zx', `${((e.clientX - r.left) / r.width) * 100}%`);
+    pmMedia.style.setProperty('--zy', `${((e.clientY - r.top) / r.height) * 100}%`);
+    pmMedia.classList.add('zooming');
+  });
+  pmMedia.addEventListener('pointerleave', () => pmMedia.classList.remove('zooming'));
+} else {
+  pmMedia.classList.add('no-zoom');
+}
+
 $('#pmAdd').addEventListener('click', (e) => {
   if (!current) return;
   addToBag(current.id, qty, e.currentTarget);
@@ -244,6 +403,10 @@ function renderBag() {
   $('#bagEmpty').hidden = lines.length > 0;
   $('#checkout').hidden = lines.length === 0;
   $('#bagTotal').textContent = money(bagTotal());
+  $('#bagBar').hidden = count === 0;
+  document.body.classList.toggle('has-bag', count > 0);
+  $('#bagBarCount').textContent = `${count} ${count === 1 ? 'piece' : 'pieces'}`;
+  $('#bagBarTotal').textContent = money(bagTotal());
   $('#bagList').innerHTML = lines.map(({ p, qty: q }) => `
     <li class="bag-item" data-id="${escapeHtml(p.id)}">
       <img src="${escapeHtml(imageSrc(p))}" alt="">
@@ -274,14 +437,17 @@ $('#bagList').addEventListener('click', (e) => {
 const drawer = $('#drawer'), scrim = $('#scrim');
 function openDrawer() {
   drawer.classList.add('open'); drawer.setAttribute('aria-hidden', 'false'); scrim.hidden = false;
+  document.body.classList.add('drawer-open');
   document.body.style.overflow = 'hidden';
   setTimeout(() => $('#drawerClose').focus(), 300);
 }
 function closeDrawer() {
   drawer.classList.remove('open'); drawer.setAttribute('aria-hidden', 'true'); scrim.hidden = true;
+  document.body.classList.remove('drawer-open');
   document.body.style.overflow = '';
 }
 $('#bagBtn').addEventListener('click', openDrawer);
+$('#bagBar').addEventListener('click', openDrawer);
 $('#drawerClose').addEventListener('click', closeDrawer);
 scrim.addEventListener('click', closeDrawer);
 drawer.addEventListener('click', (e) => { if (e.target.closest('[data-close-drawer]')) closeDrawer(); });
