@@ -2,7 +2,7 @@ import { CONFIG } from './config.js';
 import { listProducts, getSettings, money, escapeHtml } from './store.js';
 import { t, getLang, setLang, applyStatic, localName, localDesc } from './i18n.js';
 import { imageSrc } from './art.js';
-import { reveal, reducedMotion, parallax } from './effects.js';
+import { reveal, reducedMotion, parallax, loupe } from './effects.js';
 
 const $ = (s, root = document) => root.querySelector(s);
 const $$ = (s, root = document) => [...root.querySelectorAll(s)];
@@ -26,6 +26,9 @@ const HEART = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20.5S3 1
 // ---------- boot ----------
 applyStatic();
 parallax($('.hero'));
+loupe('.card-media, .spot-art');
+// The floating WhatsApp button steps aside while the hero's own button is on screen.
+if ('IntersectionObserver' in window) new IntersectionObserver(([e]) => document.body.classList.toggle('wa-in-view', e.isIntersecting)).observe($('#heroWa'));
 reveal($$('.reveal'));
 
 $('#langBtn').addEventListener('click', () => {
@@ -79,7 +82,7 @@ async function init() {
 function applySettings() {
   const { announcement, instagram } = state.settings;
   if (announcement) { const a = $('#announce'); a.textContent = announcement; a.hidden = false; }
-  $('#footWa').href = $('#heroWa').href = waLink(t('wa.hello', { shop: CONFIG.shopName }));
+  $('#footWa').href = $('#heroWa').href = $('#waFloat').href = waLink(t('wa.hello', { shop: CONFIG.shopName }));
   if (instagram) {
     const ig = $('#footIg');
     ig.href = `https://instagram.com/${instagram.replace(/^@/, '')}`;
