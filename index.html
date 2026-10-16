@@ -11,45 +11,29 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Jost:wght@300;400;500&family=Tajawal:wght@300;400;500&display=swap" rel="stylesheet">
-  <link rel="preload" as="image" href="assets/art/hero.webp" type="image/webp">
   <link rel="stylesheet" href="assets/css/shop.css">
-  <script type="importmap">{ "imports": { "three": "https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.module.min.js" } }</script>
   <script>
-    // Set language and direction before paint, and decide whether to play the short opening.
+    // Set language and direction before paint.
     try {
       var l = localStorage.getItem('ptg-lang') || ((navigator.language || '').indexOf('ar') === 0 ? 'ar' : 'en');
       document.documentElement.lang = l;
       document.documentElement.dir = l === 'ar' ? 'rtl' : 'ltr';
     } catch (e) {}
-    // If scripts fail to load, show the page anyway.
-    setTimeout(function () { document.documentElement.classList.remove('intro-on'); document.body && document.body.classList.add('hero-go'); }, 3000);
-    try {
-      if (!sessionStorage.getItem('ptg-intro') && !matchMedia('(prefers-reduced-motion: reduce)').matches) document.documentElement.classList.add('intro-on');
-    } catch (e) {}
   </script>
 </head>
 <body>
-  <!-- Opening: the monogram, a line of light, then the page -->
-  <div class="intro" id="intro" aria-hidden="true">
-    <div class="intro-mark">
-      <img src="assets/brand/logo.png" alt="" width="200" height="245">
-      <span class="intro-line"></span>
-    </div>
-    <button class="intro-skip" id="introSkip" data-i18n="intro.skip">Skip</button>
-  </div>
-
   <div class="announce" id="announce" hidden></div>
 
   <header class="top" id="top">
-    <a class="brand" href="#home" aria-label="Past Times Gems">
-      <img class="brand-logo" src="assets/brand/logo-mark.png" alt="" width="44" height="44">
-      <span class="brand-text">Past Times <em>Gems</em></span>
-    </a>
     <nav class="nav" aria-label="Main">
       <a href="#collection" data-i18n="nav.collection">Collection</a>
       <a href="#heritage" data-i18n="nav.heritage">Heritage</a>
       <a href="#order" data-i18n="nav.order">How to order</a>
     </nav>
+    <a class="brand" href="#home" aria-label="Past Times Gems">
+      <img class="brand-logo" src="assets/brand/logo-mark.png" alt="" width="44" height="44">
+      <span class="brand-text">Past Times Gems</span>
+    </a>
     <div class="top-actions">
       <button class="lang-btn" id="langBtn" data-i18n="lang.switch" data-i18n-aria="lang.switchLabel">عربي</button>
       <button class="bag-btn saved-btn" id="savedBtn" data-i18n-aria="aria.saved" aria-label="Show saved pieces">
@@ -66,19 +50,18 @@
   <main>
     <section class="hero" id="home">
       <div class="hero-copy">
-        <p class="eyebrow hero-in" data-i18n="hero.eyebrow">Fine pearls · Precious stones · Doha</p>
-        <h1 class="hero-title hero-in" data-i18n-html="hero.title">Rare by nature.<br><em>Timeless</em> by design.</h1>
-        <p class="hero-sub hero-in" data-i18n="hero.sub">Natural pearls, certified gemstones and fine jewellery, each piece chosen by hand and described honestly.</p>
-        <div class="hero-cta hero-in">
-          <a class="btn btn-gold" href="#collection" data-i18n="hero.cta">Explore the collection</a>
-          <a class="btn btn-line" href="#heritage" data-i18n="hero.story">Our story</a>
+        <p class="eyebrow" data-i18n="hero.eyebrow">Fine pearls · Precious stones · Doha</p>
+        <h1 class="hero-title" data-i18n-html="hero.title">Natural pearls, precious stones and <em>fine jewellery</em></h1>
+        <p class="hero-sub" data-i18n="hero.sub">A private collection in Doha. Every piece is chosen by hand, described honestly and delivered in person.</p>
+        <div class="hero-cta">
+          <a class="btn btn-gold" href="#collection" data-i18n="hero.cta">View the collection</a>
+          <a class="btn btn-line" id="heroWa" href="#" target="_blank" rel="noopener" data-i18n="hero.wa">Speak to us on WhatsApp</a>
         </div>
       </div>
-      <div class="hero-stage" id="heroStage" aria-hidden="true">
-        <img class="hero-poster" src="assets/art/hero.webp" alt="" width="900" height="900" fetchpriority="high">
-        <span class="hero-floor"></span>
+      <div class="medallion" aria-hidden="true">
+        <svg class="guilloche" id="heroGuilloche" viewBox="-300 -300 600 600"></svg>
+        <img class="medallion-logo" src="assets/brand/logo.png" alt="" width="200" height="245">
       </div>
-      <a class="scroll-hint" href="#collection" data-i18n-aria="hero.scroll" aria-label="Scroll to collection"><span></span></a>
     </section>
 
     <ul class="perks" aria-label="Shopping with us">
@@ -89,9 +72,9 @@
     </ul>
 
     <section class="cats" aria-label="Shop by category">
-      <button class="cat reveal" data-cat="jewellery"><img alt="" data-art="jewellery:1"><span class="cat-name" data-i18n="cat.jewellery">Jewellery</span><span class="cat-note" data-i18n="catnote.jewellery">Rings, necklaces &amp; more</span></button>
-      <button class="cat reveal" data-cat="gems"><img alt="" data-art="gems:0"><span class="cat-name" data-i18n="cat.gems">Gems</span><span class="cat-note" data-i18n="catnote.gems">Loose precious stones</span></button>
-      <button class="cat reveal" data-cat="pearls"><img alt="" data-art="pearls:2"><span class="cat-name" data-i18n="cat.pearls">Pearls</span><span class="cat-note" data-i18n="catnote.pearls">From the sea, by hand</span></button>
+      <button class="cat reveal" data-cat="pearls"><span class="cat-n">I</span><span class="cat-name" data-i18n="cat.pearls">Pearls</span><span class="cat-note" data-i18n="catnote.pearls">Natural and cultured, strands and single pearls</span><span class="cat-go" data-i18n="cat.shop">Shop</span></button>
+      <button class="cat reveal" data-cat="gems"><span class="cat-n">II</span><span class="cat-name" data-i18n="cat.gems">Gems</span><span class="cat-note" data-i18n="catnote.gems">Loose precious stones with reports</span><span class="cat-go" data-i18n="cat.shop">Shop</span></button>
+      <button class="cat reveal" data-cat="jewellery"><span class="cat-n">III</span><span class="cat-name" data-i18n="cat.jewellery">Jewellery</span><span class="cat-note" data-i18n="catnote.jewellery">Rings, necklaces and earrings in gold</span><span class="cat-go" data-i18n="cat.shop">Shop</span></button>
     </section>
 
     <section class="spotlight" id="spotlight" hidden>
@@ -156,10 +139,9 @@
             <li><b data-i18n="her.l3">Personal delivery or viewing in Doha</b></li>
           </ul>
         </div>
-        <figure class="heritage-art reveal" aria-hidden="true">
-          <img alt="" data-art="pearls:0" loading="lazy">
-          <figcaption data-i18n="her.cap">Hand-matched natural pearls</figcaption>
-        </figure>
+        <blockquote class="heritage-quote reveal">
+          <p data-i18n="her.quote">“Pearls were Qatar’s first treasure. We choose each one as carefully as the divers who found them.”</p>
+        </blockquote>
       </div>
     </section>
 
