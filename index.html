@@ -22,6 +22,7 @@
   </script>
 </head>
 <body>
+  <canvas id="sky" aria-hidden="true"></canvas>
   <div class="announce" id="announce" hidden></div>
 
   <header class="top" id="top">
@@ -49,19 +50,6 @@
 
   <main>
     <section class="hero" id="home">
-      <div class="hero-bg" aria-hidden="true">
-        <span class="glow g1" data-speed=".3"></span>
-        <span class="glow g2" data-speed=".18"></span>
-        <svg class="diamond" data-speed=".14" viewBox="-300 -300 600 600">
-          <path class="d1" pathLength="1" d="M0 -290A290 290 0 1 1 0 290A290 290 0 1 1 0 -290"/>
-          <path class="d2" pathLength="1" d="M48.8 -117.9 L117.9 -48.8 L117.9 48.8 L48.8 117.9 L-48.8 117.9 L-117.9 48.8 L-117.9 -48.8 L-48.8 -117.9Z"/>
-          <path class="d3" pathLength="1" d="M-48.8 -117.9L0.0 -191.4L48.8 -117.9M48.8 -117.9L135.3 -135.3L117.9 -48.8M117.9 -48.8L191.4 0.0L117.9 48.8M117.9 48.8L135.3 135.3L48.8 117.9M48.8 117.9L0.0 191.4L-48.8 117.9M-48.8 117.9L-135.3 135.3L-117.9 48.8M-117.9 48.8L-191.4 0.0L-117.9 -48.8M-117.9 -48.8L-135.3 -135.3L-48.8 -117.9"/>
-          <path class="d4" pathLength="1" d="M48.8 -117.9L111.0 -267.9M117.9 -48.8L267.9 -111.0M117.9 48.8L267.9 111.0M48.8 117.9L111.0 267.9M-48.8 117.9L-111.0 267.9M-117.9 48.8L-267.9 111.0M-117.9 -48.8L-267.9 -111.0M-48.8 -117.9L-111.0 -267.9M-111.0 -267.9L0.0 -191.4L111.0 -267.9M0.0 -191.4L0.0 -290.0M111.0 -267.9L135.3 -135.3L267.9 -111.0M135.3 -135.3L205.1 -205.1M267.9 -111.0L191.4 0.0L267.9 111.0M191.4 0.0L290.0 0.0M267.9 111.0L135.3 135.3L111.0 267.9M135.3 135.3L205.1 205.1M111.0 267.9L0.0 191.4L-111.0 267.9M0.0 191.4L0.0 290.0M-111.0 267.9L-135.3 135.3L-267.9 111.0M-135.3 135.3L-205.1 205.1M-267.9 111.0L-191.4 0.0L-267.9 -111.0M-191.4 0.0L-290.0 0.0M-267.9 -111.0L-135.3 -135.3L-111.0 -267.9M-135.3 -135.3L-205.1 -205.1"/>
-        </svg>
-        <span class="pearl p1" data-speed=".55"></span>
-        <span class="pearl p2" data-speed=".8"></span>
-        <span class="pearl p3" data-speed=".4"></span>
-      </div>
       <div class="hero-inner">
         <img class="hero-logo" src="assets/brand/logo.png" alt="Past Times Gems" width="200" height="245">
         <p class="eyebrow hero-step" data-i18n="hero.eyebrow">Fine pearls · Precious stones · Doha</p>
@@ -69,7 +57,7 @@
         <p class="hero-sub hero-step" data-i18n="hero.sub">A private collection in Doha. Every piece is chosen by hand, described honestly and delivered in person.</p>
         <div class="hero-cta hero-step">
           <a class="btn btn-gold" href="#collection" data-i18n="hero.cta">View the collection</a>
-          <a class="btn btn-wa-hero" id="heroWa" href="#" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2Zm5.3 14.1c-.2.6-1.3 1.2-1.8 1.2-.5.1-1 .2-3.4-.7-2.8-1.1-4.6-4-4.8-4.2-.1-.2-1.1-1.5-1.1-2.9s.7-2.1 1-2.4c.3-.3.6-.3.8-.3h.6c.2 0 .4 0 .6.5l.9 2.1c.1.2.1.4 0 .6l-.4.6-.4.5c-.1.1-.3.3-.1.6.2.3.8 1.4 1.8 2.2 1.2 1.1 2.2 1.4 2.5 1.6.3.1.5.1.7-.1l.9-1.1c.2-.3.4-.2.7-.1l2 1c.3.1.5.2.5.3.1.2.1.7-.1 1.4Z"/></svg><span data-i18n="hero.wa">Speak to us on WhatsApp</span></a>
+          <a class="btn btn-line btn-wa-hero" id="heroWa" href="#" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2Zm5.3 14.1c-.2.6-1.3 1.2-1.8 1.2-.5.1-1 .2-3.4-.7-2.8-1.1-4.6-4-4.8-4.2-.1-.2-1.1-1.5-1.1-2.9s.7-2.1 1-2.4c.3-.3.6-.3.8-.3h.6c.2 0 .4 0 .6.5l.9 2.1c.1.2.1.4 0 .6l-.4.6-.4.5c-.1.1-.3.3-.1.6.2.3.8 1.4 1.8 2.2 1.2 1.1 2.2 1.4 2.5 1.6.3.1.5.1.7-.1l.9-1.1c.2-.3.4-.2.7-.1l2 1c.3.1.5.2.5.3.1.2.1.7-.1 1.4Z"/></svg><span data-i18n="hero.wa">Speak to us on WhatsApp</span></a>
         </div>
       </div>
       <a class="scroll-cue" href="#collection" data-i18n-aria="hero.scroll" aria-label="Scroll to collection"><span></span></a>
@@ -89,7 +77,7 @@
       <li><span data-i18n="perk.4">Private viewings on request</span></li>
     </ul>
 
-    <section class="cats light pearl-ground" aria-label="Shop by category">
+    <section class="cats" aria-label="Shop by category">
       <button class="cat reveal" data-cat="pearls"><svg class="cat-icon" viewBox="0 0 48 48" aria-hidden="true"><circle cx="24" cy="24" r="13"/><path d="M16.5 19a9 9 0 0 1 6-5.5"/></svg><span class="cat-n">I</span><span class="cat-name" data-i18n="cat.pearls">Pearls</span><span class="cat-note" data-i18n="catnote.pearls">Natural and cultured, strands and single pearls</span><span class="cat-go" data-i18n="cat.shop">Shop</span></button>
       <button class="cat reveal" data-cat="gems"><svg class="cat-icon" viewBox="0 0 48 48" aria-hidden="true"><path d="M9 19 15 11h18l6 8-15 19Z M9 19h30 M15 11l4.5 8L24 11l4.5 8L33 11 M19.5 19 24 38l4.5-19"/></svg><span class="cat-n">II</span><span class="cat-name" data-i18n="cat.gems">Gems</span><span class="cat-note" data-i18n="catnote.gems">Loose precious stones with reports</span><span class="cat-go" data-i18n="cat.shop">Shop</span></button>
       <button class="cat reveal" data-cat="jewellery"><svg class="cat-icon" viewBox="0 0 48 48" aria-hidden="true"><ellipse cx="24" cy="29" rx="12.5" ry="11.5"/><path d="M19 15.5 21.5 10h5l2.5 5.5Z"/></svg><span class="cat-n">III</span><span class="cat-name" data-i18n="cat.jewellery">Jewellery</span><span class="cat-note" data-i18n="catnote.jewellery">Rings, necklaces and earrings in gold</span><span class="cat-go" data-i18n="cat.shop">Shop</span></button>
@@ -109,7 +97,7 @@
       <div class="spot-dots" id="spotDots" role="tablist" aria-label="Spotlight pieces"></div>
     </section>
 
-    <section class="collection light" id="collection">
+    <section class="collection" id="collection">
       <div class="section-head reveal">
         <p class="eyebrow" data-i18n="col.eyebrow">The collection</p>
         <h2 data-i18n="col.title">Pieces available now</h2>
@@ -163,7 +151,7 @@
       </div>
     </section>
 
-    <section class="steps light pearl-ground" id="order">
+    <section class="steps" id="order">
       <div class="section-head reveal">
         <p class="eyebrow" data-i18n="steps.eyebrow">How to order</p>
         <h2 data-i18n="steps.title">Simple, personal, on WhatsApp</h2>
