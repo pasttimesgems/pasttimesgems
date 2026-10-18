@@ -28,8 +28,6 @@ applyStatic();
 galaxy($('#sky'));
 parallax($('.hero'));
 loupe('.card-media, .spot-art');
-// The floating WhatsApp button steps aside while the hero's own button is on screen.
-if ('IntersectionObserver' in window) new IntersectionObserver(([e]) => document.body.classList.toggle('wa-in-view', e.isIntersecting)).observe($('#heroWa'));
 reveal($$('.reveal'));
 
 $('#langBtn').addEventListener('click', () => {
@@ -83,12 +81,18 @@ async function init() {
 function applySettings() {
   const { announcement, instagram } = state.settings;
   if (announcement) { const a = $('#announce'); a.textContent = announcement; a.hidden = false; }
-  $('#footWa').href = $('#heroWa').href = $('#waFloat').href = waLink(t('wa.hello', { shop: CONFIG.shopName }));
-  if (instagram) {
-    const ig = $('#footIg');
-    ig.href = `https://instagram.com/${instagram.replace(/^@/, '')}`;
-    ig.hidden = false;
+  $('#footWa').href = $('#waFloat').href = waLink(t('wa.hello', { shop: CONFIG.shopName }));
+  // Admin settings may override the Instagram handle; the config value is the fallback.
+  const handle = (instagram || CONFIG.instagram || '').replace(/^@/, '');
+  const ig = $('#footIg');
+  ig.hidden = !handle;
+  if (handle) {
+    ig.href = `https://www.instagram.com/${handle}/`;
+    ig.setAttribute('aria-label', `Instagram: ${handle}`);
+    ig.querySelector('span').textContent = handle;
   }
+  $('#footFb').hidden = !CONFIG.facebook;
+  if (CONFIG.facebook) $('#footFb').href = CONFIG.facebook;
 }
 
 // ---------- WhatsApp ----------

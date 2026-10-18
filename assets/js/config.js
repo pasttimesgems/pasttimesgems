@@ -18,6 +18,8 @@ export const CONFIG = {
   // Example for Qatar: '97455512345'. Can also be changed later in the admin page.
   whatsappNumber: '97433460196',
 
-  instagram: '', // e.g. 'pasttimesgems' (optional)
+  // Social pages shown in the footer. Instagram can also be changed in the admin page.
+  instagram: 'past_timesofficial',
+  facebook: 'https://www.facebook.com/profile.php?id=61592552664510',
   currency: 'QAR',
 };

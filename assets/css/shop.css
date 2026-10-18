@@ -149,8 +149,6 @@ h2 em, .brand-text em, .hero-title em { font-style: italic; color: var(--accent-
 @keyframes shine { from { background-position: 100% 0; } 50%, to { background-position: -50% 0; } }
 .hero-sub { max-width: 34rem; color: var(--muted); font-size: 1.08rem; margin: 0 auto 2.4rem; }
 .hero-cta { display: flex; gap: .8rem; flex-wrap: wrap; justify-content: center; }
-.btn-wa-hero { gap: .6rem; }
-.btn-wa-hero svg { width: 19px; height: 19px; fill: var(--accent-hi); flex: none; }
 .scroll-cue { position: absolute; bottom: 1.6rem; left: 50%; translate: -50% 0; width: 26px; height: 42px; border: 1px solid var(--line-2); border-radius: 14px; }
 .scroll-cue span { position: absolute; left: 50%; top: 8px; width: 3px; height: 8px; margin-left: -1.5px; border-radius: 2px; background: var(--accent-hi); animation: cue 1.8s var(--ease) infinite; }
 @keyframes cue { 70%, 100% { transform: translateY(14px); opacity: 0; } }
@@ -169,7 +167,6 @@ h2 em, .brand-text em, .hero-title em { font-style: italic; color: var(--accent-
 .wa-float::before { content: ''; position: absolute; inset: -1px; border-radius: 50%; border: 1px solid var(--accent); animation: ping 3s ease-out 2s infinite; pointer-events: none; }
 @keyframes ping { 0% { opacity: .8; transform: scale(1); } 70%, 100% { opacity: 0; transform: scale(1.45); } }
 .wa-float:hover { transform: translateY(-3px); border-color: var(--accent-hi); }
-body.wa-in-view .wa-float { opacity: 0; visibility: hidden; transform: translateY(16px); }
 body.has-bag .wa-float { bottom: calc(5.6rem + env(safe-area-inset-bottom)); }
 body.drawer-open .wa-float { display: none; }
 
@@ -327,9 +324,15 @@ body.drawer-open .wa-float { display: none; }
 /* ---------- footer ---------- */
 .foot { display: grid; justify-items: center; gap: 1.6rem; padding: 4rem var(--gutter) 2.5rem; border-top: 1px solid var(--line); text-align: center; }
 .foot-logo { width: 120px; height: auto; }
-.foot-links { display: flex; gap: 2rem; flex-wrap: wrap; justify-content: center; font-size: .72rem; letter-spacing: .22em; text-transform: uppercase; color: var(--muted); }
-.foot-links a { text-decoration: none; transition: color var(--fast); }
-.foot-links a:hover { color: var(--accent-hi); }
+.socials { display: flex; gap: .8rem 1.4rem; flex-wrap: wrap; justify-content: center; }
+.social { display: inline-flex; align-items: center; gap: .6rem; text-decoration: none; color: var(--muted); font-size: .85rem; transition: color var(--fast); }
+.social svg { box-sizing: content-box; width: 18px; height: 18px; padding: 10px; border: 1px solid var(--line-2); border-radius: 50%; color: var(--accent-hi); transition: border-color var(--fast), background-color var(--fast), color var(--fast); }
+.social .ig { fill: none; stroke: currentColor; stroke-width: 1.6; }
+.social .ig .dot { fill: currentColor; stroke: none; }
+.social .fb, .social .wa { fill: currentColor; }
+.social:hover { color: var(--ink); }
+.social:hover svg { background: var(--accent-grad); border-color: transparent; color: var(--on-accent); }
+.foot-loc { margin: 0; font-size: .72rem; letter-spacing: .22em; text-transform: uppercase; color: var(--muted); }
 .foot-small { margin: 0; font-size: .72rem; color: var(--faint); }
 
 /* ---------- product modal ---------- */
@@ -445,7 +448,7 @@ body.has-bag .foot { padding-bottom: 7rem; }
 /* ---------- Arabic ---------- */
 :root[lang="ar"] body { font-family: var(--arabic-sans); }
 :root[lang="ar"] :is(h1, h2, h3, .card-name, .mini-name, .spot-copy h3, .step-list h3, .total-row, .bag-empty, .empty, .loading, .cat-name) { font-family: var(--arabic-sans); font-weight: 300; letter-spacing: 0; }
-:root[lang="ar"] :is(.eyebrow, .nav a, .chip, .btn, .cat-note, .card-cat, .badge, .quick, .cat-go, .brand-text, .perks, .bag-bar-info, .bag-bar-cta, .checkout label, .zoom-hint, .pm-specs dt, .remove, .intro-skip, .foot-links, .promises b, .heritage-art figcaption) { letter-spacing: 0; text-transform: none; }
+:root[lang="ar"] :is(.eyebrow, .nav a, .chip, .btn, .cat-note, .card-cat, .badge, .quick, .cat-go, .brand-text, .perks, .bag-bar-info, .bag-bar-cta, .checkout label, .zoom-hint, .pm-specs dt, .remove, .intro-skip, .foot-loc, .promises b, .heritage-art figcaption) { letter-spacing: 0; text-transform: none; }
 :root[lang="ar"] .eyebrow { font-size: .9rem; }
 :root[lang="ar"] .nav a { font-size: .95rem; }
 :root[lang="ar"] .chip, :root[lang="ar"] .btn { font-size: .9rem; }
@@ -487,6 +490,7 @@ body.has-bag .foot { padding-bottom: 7rem; }
   .hero { min-height: calc(100svh - 60px); padding: 2rem 1.25rem 4.5rem; }
   .hero-logo { width: 112px; margin-bottom: 1.3rem; }
   .scroll-cue { display: none; }
+  .foot { padding-bottom: 6.5rem; }
   .wa-float { width: 54px; height: 54px; inset-inline-end: max(.9rem, env(safe-area-inset-right)); bottom: calc(.9rem + env(safe-area-inset-bottom)); }
   body.has-bag .wa-float { bottom: calc(5.2rem + env(safe-area-inset-bottom)); }
   .ribbon-track { font-size: 1.05rem; gap: 1.6rem; padding: .85rem 0; }
