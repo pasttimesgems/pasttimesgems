@@ -55,15 +55,17 @@ To remove someone later: delete them in **Authentication → Users** and run
 
 ## 4. Connect the website to the database
 
-1. In Supabase open **Project Settings → API** (or **Data API**). Copy:
-   - **Project URL** (looks like `https://abcd1234.supabase.co`)
-   - **anon public** key (a long text starting with `eyJ...`)
+1. In Supabase open **Project Settings → API Keys** (or **Data API**). Copy:
+   - **Project URL** (looks like `https://abcd1234.supabase.co`, without `/rest/v1/`)
+   - the **publishable** key (starts with `sb_publishable_`), or the older
+     **anon public** key (a long text starting with `eyJ...`). Never use the
+     *secret* or *service_role* key here.
 2. In this repository open [`assets/js/config.js`](assets/js/config.js),
    click the pencil icon to edit, and paste them in:
 
    ```js
    supabaseUrl: 'https://abcd1234.supabase.co',
-   supabaseAnonKey: 'eyJ...',
+   supabaseAnonKey: 'sb_publishable_...',
    whatsappNumber: '97455512345',
    ```
 

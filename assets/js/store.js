@@ -4,7 +4,7 @@
 import { CONFIG } from './config.js';
 import { DEMO_PRODUCTS } from './demo-data.js';
 
-const SUPABASE_ESM = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/+esm';
+const SUPABASE_ESM = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.2/+esm';
 const BUCKET = 'product-images';
 
 export const isLive = Boolean(CONFIG.supabaseUrl && CONFIG.supabaseAnonKey);
