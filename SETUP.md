@@ -90,24 +90,44 @@ Orders are sent to WhatsApp, so this number receives them.
 ## 6. Add your first product
 
 1. Open `…/admin.html` and sign in with an admin email from step 3.
-2. Press **+ Add product**, choose a photo, fill in the name, category and
-   price in QAR, and **Save**.
+2. Press **+ Add product**, choose a photo, fill in the name, category,
+   price in QAR and **pieces available**, and **Save**. It gets an item code
+   such as `PTG-0012` automatically.
 3. Open the shop page. The product is there.
 
 Tips:
 - Photos are shrunk automatically before upload so the free storage lasts.
-- Mark a piece **Sold** to keep it on show with a "Sold" badge, or untick
-  **Visible** to hide it without deleting it.
-- **Featured** pieces are shown first.
+- The **cost price** and stock counts are seen only in the admin page.
+  Customers only see "Sold out" when none are left.
+- **Featured** pieces are shown first. The three newest pieces still for sale
+  appear under "Just arrived" on the home page.
+- Untick **Visible** to hide a piece without deleting it.
+
+## Looking after stock
+
+- When a piece sells, press **Sold** on it (or **Stock** for more choices) and
+  enter how many. Orders sent on WhatsApp never change stock by themselves:
+  only you do, once the sale is confirmed.
+- **Stock** also records pieces **returned**, new pieces **added**, and
+  **correct count** after you count a tray. Every change is kept with who made
+  it and when.
+- Each product has a **low-stock alert** level (1 unless you change it). Pieces
+  at or below it are listed under **Needs attention** on the admin home screen.
+- **Reports** shows sales, profit, stock value and the full history for today,
+  this week, this month or any dates you choose. **Download Excel** saves it as
+  a spreadsheet; **Print / PDF** prints it with the logo (choose "Save as PDF"
+  in the print window to keep a file).
 
 ---
 
 ## After an update
 
-If you set up Supabase before the Arabic product names were added, run
-[`supabase/schema.sql`](supabase/schema.sql) once more in the SQL Editor. It
-only adds what is missing (the `name_ar` and `description_ar` columns) and
-keeps your products.
+When an update adds new database features (Arabic names, stock and reports,
+the "Visit us" card), run [`supabase/schema.sql`](supabase/schema.sql) once
+more in **SQL Editor → New query → Run**. It only adds what is missing and
+keeps your products. Existing products start with 1 piece in stock (0 if they
+were marked sold) and get item codes; set the real counts with **Stock →
+Correct count**.
 
 ## How ordering works
 
