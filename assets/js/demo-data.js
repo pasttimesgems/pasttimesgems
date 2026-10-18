@@ -1,5 +1,8 @@
 // Sample pieces shown in demo mode (before Supabase is connected).
-const day = (n) => new Date(Date.UTC(2026, 9, 1 + n)).toISOString();
+// Dates are relative to today so the demo reports always have recent activity.
+const DAY = 864e5;
+const ago = (days, hour = 11) => { const d = new Date(Date.now() - days * DAY); d.setHours(hour, 15, 0, 0); return d.toISOString(); };
+const day = (n) => ago(60 - n * 2);
 
 export const DEMO_PRODUCTS = [
   { id: 'demo-1', name: 'Gulf Natural Pearl Strand', name_ar: 'عقد لؤلؤ الخليج الطبيعي', description_ar: 'عقد من لؤلؤ طبيعي منتقى يدوياً ببريق كريمي ناعم، مع قفل ذهبي منقوش.', category: 'pearls', price: 18500, status: 'available', featured: true, visible: true,
@@ -43,3 +46,41 @@ export const DEMO_PRODUCTS = [
     description: 'Silver-grey pearls with peacock overtones, a quiet everyday luxury.',
     image_url: 'art:pearls:3', created_at: day(5) },
 ];
+
+// Inventory for the demo: pieces in stock, item codes, low-stock levels and cost prices.
+const STOCK = { 'demo-1': 1, 'demo-2': 2, 'demo-3': 3, 'demo-4': 4, 'demo-5': 1, 'demo-6': 2, 'demo-7': 1, 'demo-8': 3, 'demo-9': 0, 'demo-10': 5 };
+DEMO_PRODUCTS.forEach((p, i) => Object.assign(p, {
+  stock: STOCK[p.id], low_stock: p.id === 'demo-10' ? 2 : 1, sku: `PTG-${String(i + 1).padStart(4, '0')}`,
+}));
+export const DEMO_COSTS = Object.fromEntries(DEMO_PRODUCTS.map((p) => [p.id, Math.round(p.price * 0.62)]));
+
+// Sales over the last month, so the reports have something to show.
+const SALES = [
+  ['demo-4', 'sold', 1, 0], ['demo-10', 'sold', 2, 1], ['demo-2', 'sold', 1, 2], ['demo-6', 'sold', 1, 4],
+  ['demo-9', 'sold', 1, 6], ['demo-10', 'returned', 1, 6], ['demo-3', 'sold', 1, 9], ['demo-8', 'sold', 1, 13],
+  ['demo-4', 'sold', 1, 20], ['demo-1', 'sold', 1, 26], ['demo-7', 'corrected', 1, 3],
+];
+
+export function demoMovements() {
+  const byId = Object.fromEntries(DEMO_PRODUCTS.map((p) => [p.id, p]));
+  const change = (kind, qty) => (kind === 'sold' ? -qty : qty);
+  // Work out the starting stock so the history ends at today's count.
+  const start = { ...STOCK };
+  for (const [id, kind, qty] of SALES) if (kind !== 'corrected') start[id] -= change(kind, qty);
+  const moves = DEMO_PRODUCTS.map((p) => ({ product_id: p.id, kind: 'added', qty: start[p.id], at: p.created_at }));
+  for (const [id, kind, qty, d] of SALES) moves.push({ product_id: id, kind, qty, at: ago(d, 10 + (d % 7)) });
+  moves.sort((a, b) => a.at.localeCompare(b.at));
+  const level = {};
+  return moves.map((m, i) => {
+    const p = byId[m.product_id];
+    const before = level[p.id] ?? 0;
+    const ch = m.kind === 'corrected' ? m.qty - before : change(m.kind, m.qty);
+    level[p.id] = before + ch;
+    return {
+      id: i + 1, product_id: p.id, product_name: p.name, sku: p.sku, kind: m.kind, qty: m.qty, change: ch,
+      stock_after: level[p.id], unit_price: p.price, unit_cost: m.kind === 'added' ? null : DEMO_COSTS[p.id],
+      note: m.kind === 'corrected' ? 'Counted the tray' : null, by_email: 'demo@pasttimesgems', created_at: m.at,
+    };
+  });
+}
+

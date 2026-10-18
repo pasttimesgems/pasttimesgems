@@ -2,7 +2,7 @@
 // Uses Supabase when config.js has keys, otherwise a browser-only demo store.
 
 import { CONFIG } from './config.js';
-import { DEMO_PRODUCTS } from './demo-data.js';
+import { DEMO_PRODUCTS, DEMO_COSTS, demoMovements } from './demo-data.js';
 
 const SUPABASE_ESM = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.2/+esm';
 const BUCKET = 'product-images';
@@ -18,6 +18,17 @@ export const STATUSES = [
   { id: 'reserved', label: 'Reserved' },
   { id: 'sold', label: 'Sold' },
 ];
+export const MOVEMENTS = [
+  { id: 'sold', label: 'Sold' },
+  { id: 'returned', label: 'Returned' },
+  { id: 'added', label: 'Added' },
+  { id: 'corrected', label: 'Corrected' },
+];
+
+// A piece is sold out when none are left (or it was marked sold before stock was tracked).
+export const stockOf = (p) => (p.stock == null ? (p.status === 'sold' ? 0 : 1) : Number(p.stock));
+export const isSoldOut = (p) => p.status === 'sold' || stockOf(p) <= 0;
+export const isLowStock = (p) => stockOf(p) <= Number(p.low_stock ?? 1);
 
 let clientPromise;
 function db() {
@@ -29,9 +40,11 @@ function db() {
 const fail = (error) => { if (error) throw new Error(error.message || String(error)); };
 
 // ---------- demo store (localStorage) ----------
-const DEMO_KEY = 'ptg-demo-products-v2';
+const DEMO_KEY = 'ptg-demo-products-v3';
 const DEMO_SETTINGS_KEY = 'ptg-demo-settings-v1';
 const DEMO_SESSION_KEY = 'ptg-demo-admin';
+const DEMO_COSTS_KEY = 'ptg-demo-costs-v1';
+const DEMO_MOVES_KEY = 'ptg-demo-moves-v1';
 
 function readJSON(key, fallback) {
   try { const v = localStorage.getItem(key); return v ? JSON.parse(v) : fallback; } catch { return fallback; }
@@ -41,6 +54,8 @@ function writeJSON(key, value) {
   catch { throw new Error('Browser storage is full. In demo mode, use smaller photos.'); }
 }
 const demoProducts = () => readJSON(DEMO_KEY, null) ?? DEMO_PRODUCTS;
+const demoCosts = () => readJSON(DEMO_COSTS_KEY, null) ?? DEMO_COSTS;
+const demoMoves = () => readJSON(DEMO_MOVES_KEY, null) ?? demoMovements();
 
 // ---------- products ----------
 const byNewest = (a, b) => (b.featured - a.featured) || String(b.created_at).localeCompare(String(a.created_at));
@@ -59,33 +74,56 @@ export async function listProducts({ includeHidden = false } = {}) {
   return data;
 }
 
-export async function saveProduct(product, imageFile) {
+// Saves a product. Stock is set only when a product is first added; after that
+// it changes through recordMovement so the history always matches the count.
+// `cost` (admin only) is the cost price; leave it undefined to keep the current one.
+export async function saveProduct(product, imageFile, cost) {
   const row = { ...product };
   if (imageFile) row.image_url = await uploadImage(imageFile);
   row.price = Number(row.price) || 0;
+  row.low_stock = Math.max(0, Math.round(Number(row.low_stock ?? 1) || 0));
+  if (row.id) delete row.stock;
+  else row.stock = Math.max(0, Math.round(Number(row.stock) || 0));
+  delete row.sku;
 
   if (!isLive) {
     const all = demoProducts().slice();
-    if (row.id) {
-      const i = all.findIndex((p) => p.id === row.id);
+    let id = row.id;
+    if (id) {
+      const i = all.findIndex((p) => p.id === id);
       all[i] = { ...all[i], ...row };
     } else {
-      all.push({ ...row, id: crypto.randomUUID(), created_at: new Date().toISOString() });
+      id = crypto.randomUUID();
+      const next = Math.max(0, ...all.map((p) => Number(String(p.sku || '').replace(/\D/g, '')) || 0)) + 1;
+      const created = { ...row, id, sku: `PTG-${String(next).padStart(4, '0')}`, created_at: new Date().toISOString() };
+      all.push(created);
+      if (created.stock > 0) pushDemoMove(created, 'added', created.stock, created.stock, created.stock, null);
     }
     writeJSON(DEMO_KEY, all);
+    if (cost !== undefined) writeJSON(DEMO_COSTS_KEY, { ...demoCosts(), [id]: Number(cost) || 0 });
     return;
   }
   const sb = await db();
   const { id, created_at, ...fields } = row;
-  const { error } = id
-    ? await sb.from('products').update(fields).eq('id', id)
-    : await sb.from('products').insert(fields);
-  fail(error);
+  let savedId = id;
+  if (id) {
+    const { error } = await sb.from('products').update(fields).eq('id', id);
+    fail(error);
+  } else {
+    const { data, error } = await sb.from('products').insert(fields).select('id').single();
+    fail(error);
+    savedId = data.id;
+  }
+  if (cost !== undefined) {
+    const { error } = await sb.from('product_costs').upsert({ product_id: savedId, cost_price: Number(cost) || 0 });
+    fail(error);
+  }
 }
 
 export async function deleteProduct(product) {
   if (!isLive) {
     writeJSON(DEMO_KEY, demoProducts().filter((p) => p.id !== product.id));
+    writeJSON(DEMO_MOVES_KEY, demoMoves().map((m) => (m.product_id === product.id ? { ...m, product_id: null } : m)));
     return;
   }
   const sb = await db();
@@ -97,8 +135,66 @@ export async function deleteProduct(product) {
 }
 
 export function resetDemo() {
-  localStorage.removeItem(DEMO_KEY);
-  localStorage.removeItem(DEMO_SETTINGS_KEY);
+  for (const k of [DEMO_KEY, DEMO_SETTINGS_KEY, DEMO_COSTS_KEY, DEMO_MOVES_KEY]) localStorage.removeItem(k);
+}
+
+// ---------- inventory (admin only) ----------
+export async function listCosts() {
+  if (!isLive) return { ...demoCosts() };
+  const sb = await db();
+  const { data, error } = await sb.from('product_costs').select('product_id, cost_price');
+  fail(error);
+  return Object.fromEntries(data.map((r) => [r.product_id, Number(r.cost_price)]));
+}
+
+function pushDemoMove(p, kind, qty, change, after, note) {
+  const moves = demoMoves();
+  moves.push({
+    id: Math.max(0, ...moves.map((m) => m.id)) + 1, product_id: p.id, product_name: p.name, sku: p.sku, kind, qty, change,
+    stock_after: after,
+    unit_price: Number(p.price), unit_cost: kind === 'added' ? null : (demoCosts()[p.id] ?? null),
+    note: note || null, by_email: readJSON(DEMO_SESSION_KEY, {})?.email || 'demo', created_at: new Date().toISOString(),
+  });
+  writeJSON(DEMO_MOVES_KEY, moves);
+}
+
+// Records a stock change. kind: sold | returned | added | corrected.
+// For "corrected", qty is the new count. Returns the new stock.
+export async function recordMovement(productId, kind, qty, note = '') {
+  qty = Math.round(Number(qty));
+  if (!Number.isFinite(qty) || qty < 0 || (kind !== 'corrected' && qty === 0)) throw new Error('Enter how many pieces.');
+  if (!isLive) {
+    const all = demoProducts().slice();
+    const i = all.findIndex((p) => p.id === productId);
+    if (i < 0) throw new Error('That product no longer exists.');
+    const p = all[i], stock = stockOf(p);
+    const change = { sold: -qty, returned: qty, added: qty, corrected: qty - stock }[kind];
+    if (stock + change < 0) throw new Error(`Only ${stock} in stock.`);
+    const after = stock + change;
+    pushDemoMove(p, kind, qty, change, after, note);
+    all[i] = { ...p, stock: after, status: after === 0 ? 'sold' : p.status === 'sold' ? 'available' : p.status };
+    writeJSON(DEMO_KEY, all);
+    return after;
+  }
+  const sb = await db();
+  const { data, error } = await sb.rpc('record_movement', { p_product: productId, p_kind: kind, p_qty: qty, p_note: note || null });
+  fail(error);
+  return data;
+}
+
+// Stock history between two dates (Date objects), newest first.
+export async function listMovements(from, to) {
+  if (!isLive) {
+    const a = from.toISOString(), b = to.toISOString();
+    return demoMoves().filter((m) => m.created_at >= a && m.created_at < b)
+      .sort((x, y) => y.created_at.localeCompare(x.created_at));
+  }
+  const sb = await db();
+  const { data, error } = await sb.from('stock_movements').select('*')
+    .gte('created_at', from.toISOString()).lt('created_at', to.toISOString())
+    .order('created_at', { ascending: false }).limit(5000);
+  fail(error);
+  return data;
 }
 
 // Shrinks photos before upload so the free storage tier lasts and pages load fast.
@@ -142,6 +238,9 @@ const DEFAULT_SETTINGS = {
   whatsapp_number: CONFIG.whatsappNumber,
   announcement: '',
   instagram: CONFIG.instagram,
+  address: CONFIG.location,
+  hours: '',
+  map_url: '',
 };
 
 export async function getSettings() {

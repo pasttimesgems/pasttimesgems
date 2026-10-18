@@ -1,4 +1,4 @@
-// Motion for the showroom: the galaxy background, sliding reveals, a light hero parallax and the jeweller's loupe.
+// Motion for the showroom: the galaxy background, sliding reveals and a light hero parallax.
 
 export const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
 
@@ -34,37 +34,10 @@ export function parallax(hero) {
   paint();
 }
 
-// Jeweller's loupe: on a mouse, a gold-rimmed lens follows the pointer over
-// product images and shows the piece magnified.
-export function loupe(selector) {
-  if (!matchMedia('(hover: hover) and (pointer: fine)').matches) return;
-  const lens = document.createElement('div');
-  lens.className = 'loupe';
-  lens.setAttribute('aria-hidden', 'true');
-  document.body.append(lens);
-  const ZOOM = 2.4, SIZE = 170;
-  let img = null;
-  addEventListener('pointermove', (e) => {
-    const hit = e.target.closest?.(selector);
-    const el = hit && (hit.tagName === 'IMG' ? hit : hit.querySelector('img'));
-    if (!el || !el.complete) { if (img) { img = null; lens.classList.remove('on'); } return; }
-    const r = el.getBoundingClientRect();
-    if (img !== el) {
-      img = el;
-      lens.style.backgroundImage = `url("${el.currentSrc || el.src}")`;
-      lens.style.backgroundSize = `${r.width * ZOOM}px ${r.height * ZOOM}px`;
-      lens.classList.add('on');
-    }
-    const x = e.clientX - r.left, y = e.clientY - r.top;
-    lens.style.transform = `translate3d(${e.clientX - SIZE / 2}px, ${e.clientY - SIZE / 2}px, 0)`;
-    lens.style.backgroundPosition = `${SIZE / 2 - x * ZOOM}px ${SIZE / 2 - y * ZOOM}px`;
-  }, { passive: true });
-  addEventListener('scroll', () => { img = null; lens.classList.remove('on'); }, { passive: true });
-}
-
 // The night sky behind the page: twinkling stars, gold dust, pearls drifting
-// slowly upwards and the odd tiny gem catching the light. Layers move at
-// different speeds as the page scrolls, which gives a gentle sense of depth.
+// slowly upwards and the odd tiny gem catching the light. Kept faint and sparse
+// so products and text stay easy to read. Layers move at different speeds as
+// the page scrolls, and pearls drift gently towards the mouse or finger.
 const GEMS = ['#3fd0a0', '#6b93ff', '#ff6d8c', '#b48cff', '#ffd062'];
 
 function pearlSprite() {
@@ -102,13 +75,14 @@ export function galaxy(canvas) {
       kind: isPearl ? 'pearl' : isGem ? 'gem' : 'dust',
       x: Math.random() * w,
       y: anywhere ? Math.random() * h : h + 20 + Math.random() * 60,
-      r: isPearl ? 4 + Math.random() * 7 : isGem ? 2 + Math.random() * 2.5 : .5 + Math.random() * 1.3,
+      r: isPearl ? 3 + Math.random() * 4.5 : isGem ? 1.6 + Math.random() * 1.8 : .5 + Math.random() * 1.1,
       vy: isPearl ? .12 + Math.random() * .22 : .1 + Math.random() * .3,
       depth: isPearl ? .1 + Math.random() * .25 : .05 + Math.random() * .15,
       sway: .2 + Math.random() * .5,
       phase: Math.random() * Math.PI * 2,
       color: GEMS[Math.floor(Math.random() * GEMS.length)],
-      a: .35 + Math.random() * .55,
+      a: isPearl ? .3 + Math.random() * .35 : .2 + Math.random() * .35,
+      ox: 0, oy: 0, // pull towards the pointer
     };
   };
 
@@ -118,17 +92,17 @@ export function galaxy(canvas) {
     canvas.width = w * dpr; canvas.height = h * dpr;
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     const area = w * h;
-    stars = Array.from({ length: Math.round(Math.min(260, area / 5200)) }, () => ({
+    stars = Array.from({ length: Math.round(Math.min(150, area / 8500)) }, () => ({
       x: Math.random() * w, y: Math.random() * h * 1.6, r: Math.random() < .9 ? .4 + Math.random() * .7 : 1.1 + Math.random() * .6,
       depth: .02 + Math.random() * .06, phase: Math.random() * Math.PI * 2, speed: .6 + Math.random() * 1.6,
     }));
-    drift = Array.from({ length: Math.round(Math.min(70, area / 18000)) }, () => mote(true));
+    drift = Array.from({ length: Math.round(Math.min(36, area / 34000)) }, () => mote(true));
   };
 
   const gem = (x, y, r, color, alpha) => {
     ctx.globalAlpha = alpha;
     ctx.fillStyle = color;
-    ctx.shadowColor = color; ctx.shadowBlur = r * 3;
+    ctx.shadowColor = color; ctx.shadowBlur = r * 2;
     ctx.beginPath(); // a small cut stone seen from the side: crown and pavilion
     ctx.moveTo(x - r, y - r * .2); ctx.lineTo(x - r * .55, y - r * .75); ctx.lineTo(x + r * .55, y - r * .75);
     ctx.lineTo(x + r, y - r * .2); ctx.lineTo(x, y + r); ctx.closePath();
@@ -144,13 +118,13 @@ export function galaxy(canvas) {
       const y = ((s.y - scroll * s.depth) % (h * 1.6) + h * 1.6) % (h * 1.6);
       if (y > h) continue;
       const tw = .45 + .55 * Math.sin(t * s.speed + s.phase);
-      ctx.globalAlpha = .25 + .6 * tw;
+      ctx.globalAlpha = .15 + .4 * tw;
       ctx.fillStyle = s.r > 1.1 ? '#fff6dc' : '#ffffff';
       ctx.beginPath(); ctx.arc(s.x, y, s.r, 0, Math.PI * 2); ctx.fill();
     }
     for (const p of drift) {
-      const x = p.x + Math.sin(t * p.sway + p.phase) * 14;
-      const y = p.y - scroll * p.depth;
+      const x = p.x + Math.sin(t * p.sway + p.phase) * 14 + p.ox;
+      const y = p.y - scroll * p.depth + p.oy;
       if (y < -30 || y > h + 30) continue;
       if (p.kind === 'pearl') {
         ctx.globalAlpha = p.a;
@@ -170,11 +144,32 @@ export function galaxy(canvas) {
   addEventListener('resize', resize);
   if (reducedMotion) { draw(0, 0); return; }
 
+  // Pointer (mouse or finger) that pearls and gems lean towards.
+  const pointer = { x: 0, y: 0, on: false };
+  const aim = (e) => { pointer.x = e.clientX; pointer.y = e.clientY; pointer.on = true; };
+  addEventListener('pointermove', aim, { passive: true });
+  addEventListener('pointerdown', aim, { passive: true });
+  addEventListener('pointerup', (e) => { if (e.pointerType !== 'mouse') pointer.on = false; }, { passive: true });
+  document.addEventListener('pointerleave', () => { pointer.on = false; });
+  addEventListener('blur', () => { pointer.on = false; });
+  const REACH = 220, PULL = 38;
+
   let last = performance.now(), t = 0, running = true;
   const frame = (now) => {
     if (!running) return;
     const dt = Math.min(now - last, 50) / 16.7; last = now; t += dt * .016;
     for (const p of drift) {
+      let tx = 0, ty = 0;
+      if (pointer.on && p.kind !== 'dust') {
+        const px = p.x + Math.sin(t * p.sway + p.phase) * 14, py = p.y - scrollY * p.depth;
+        const dx = pointer.x - px, dy = pointer.y - py, d = Math.hypot(dx, dy);
+        if (d < REACH && d > 1) {
+          const k = (1 - d / REACH) * PULL;
+          tx = (dx / d) * Math.min(k, d * .6); ty = (dy / d) * Math.min(k, d * .6);
+        }
+      }
+      // ease towards the target, so pearls glide over and settle back
+      p.ox += (tx - p.ox) * .045 * dt; p.oy += (ty - p.oy) * .045 * dt;
       p.y -= p.vy * dt;
       if (p.y - scrollY * p.depth < -40) Object.assign(p, mote(false), { y: h + 20 + scrollY * p.depth });
       else if (p.y - scrollY * p.depth > h + 80) p.y -= h + 100;

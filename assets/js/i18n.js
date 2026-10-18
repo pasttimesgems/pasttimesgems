@@ -54,6 +54,10 @@ const STRINGS = {
     'wa.ask': 'Hello {shop}, I\'m interested in "{name}" ({price}). Is it available?',
     'wa.order': 'New order · {shop}', 'wa.ref': 'Order ref', 'wa.qty': 'Qty', 'wa.total': 'Total',
     'wa.name': 'Name', 'wa.phone': 'Phone', 'wa.delivery': 'Delivery', 'wa.address': 'Address', 'wa.notes': 'Notes',
+    'new.eyebrow': 'New arrivals', 'new.title': 'Just <em>arrived</em>', 'badge.new': 'New', 'badge.soldout': 'Sold out',
+    'visit.eyebrow': 'Visit us', 'visit.title': 'See the pieces in person', 'visit.hours': 'Opening hours',
+    'visit.map': 'Open in Maps', 'visit.book': 'Book a private viewing',
+    'wa.visit': 'Hello {shop}, I would like to book a private viewing.',
   },
   ar: {
     'nav.collection': 'المجموعة', 'nav.heritage': 'إرثنا', 'nav.order': 'طريقة الطلب',
@@ -106,6 +110,10 @@ const STRINGS = {
     'wa.ask': 'مرحباً {shop}، أنا مهتم بـ "{name}" ({price}). هل هي متوفرة؟',
     'wa.order': 'طلب جديد · {shop}', 'wa.ref': 'رقم الطلب', 'wa.qty': 'الكمية', 'wa.total': 'المجموع',
     'wa.name': 'الاسم', 'wa.phone': 'الهاتف', 'wa.delivery': 'الاستلام', 'wa.address': 'العنوان', 'wa.notes': 'ملاحظات',
+    'new.eyebrow': 'وصل حديثاً', 'new.title': 'قطع <em>جديدة</em>', 'badge.new': 'جديد', 'badge.soldout': 'نفدت الكمية',
+    'visit.eyebrow': 'زورونا', 'visit.title': 'شاهد القطع عن قرب', 'visit.hours': 'ساعات العمل',
+    'visit.map': 'افتح في الخرائط', 'visit.book': 'احجز معاينة خاصة',
+    'wa.visit': 'مرحباً {shop}، أود حجز معاينة خاصة.',
   },
 };
 

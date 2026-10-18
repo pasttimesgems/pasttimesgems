@@ -1,8 +1,8 @@
 import { CONFIG } from './config.js';
-import { listProducts, getSettings, money, escapeHtml } from './store.js';
+import { listProducts, getSettings, money, escapeHtml, isSoldOut, stockOf } from './store.js';
 import { t, getLang, setLang, applyStatic, localName, localDesc } from './i18n.js';
 import { imageSrc } from './art.js';
-import { reveal, reducedMotion, parallax, loupe, galaxy } from './effects.js';
+import { reveal, reducedMotion, parallax, galaxy } from './effects.js';
 
 const $ = (s, root = document) => root.querySelector(s);
 const $$ = (s, root = document) => [...root.querySelectorAll(s)];
@@ -27,7 +27,6 @@ const HEART = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20.5S3 1
 applyStatic();
 galaxy($('#sky'));
 parallax($('.hero'));
-loupe('.card-media, .spot-art');
 reveal($$('.reveal'));
 
 $('#langBtn').addEventListener('click', () => {
@@ -35,7 +34,7 @@ $('#langBtn').addEventListener('click', () => {
   applySettings();
   renderCounts();
   renderSaved();
-  renderSpotlight();
+  renderArrivals();
   renderGrid();
   renderBag();
   if (modal.open && current) openProduct(current.id);
@@ -65,14 +64,15 @@ async function init() {
   // Drop bag lines for pieces that were removed or sold since the visitor's last visit.
   bag = bag.filter((l) => {
     const p = products.find((x) => x.id === l.id);
-    return p && p.status !== 'sold';
+    if (p && !isSoldOut(p)) l.qty = Math.min(l.qty, maxQty(p));
+    return p && !isSoldOut(p);
   });
   saveBag();
   saved = new Set([...saved].filter((id) => products.some((p) => p.id === id)));
   persistSaved();
   renderCounts();
   renderSaved();
-  renderSpotlight();
+  renderArrivals();
   renderGrid();
   renderBag();
   openFromHash();
@@ -93,6 +93,20 @@ function applySettings() {
   }
   $('#footFb').hidden = !CONFIG.facebook;
   if (CONFIG.facebook) $('#footFb').href = CONFIG.facebook;
+  // Story buttons and the "Visit us" card.
+  $('#storyIg').hidden = !handle;
+  if (handle) $('#storyIg').href = ig.href;
+  $('#storyFb').hidden = !CONFIG.facebook;
+  if (CONFIG.facebook) $('#storyFb').href = CONFIG.facebook;
+  $('#storyWa').href = $('#footWa').href;
+  const { address, hours, map_url: mapUrl } = state.settings;
+  const place = address || CONFIG.location;
+  $('#visitAddress').textContent = place;
+  $('#footLoc').textContent = place;
+  $('#visitHoursRow').hidden = !hours;
+  $('#visitHours').textContent = hours || '';
+  $('#visitMap').href = mapUrl || `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${CONFIG.shopName}, ${place}`)}`;
+  $('#visitBook').href = waLink(t('wa.visit', { shop: CONFIG.shopName }));
 }
 
 // ---------- WhatsApp ----------
@@ -109,7 +123,7 @@ function visibleProducts() {
     (state.filter === 'all' || p.category === state.filter || (state.filter === 'saved' && saved.has(p.id))) &&
     (!q || [p.name, p.name_ar, p.description, p.description_ar, p.material, p.origin].join(' ').toLowerCase().includes(q)));
   const sorters = {
-    featured: (a, b) => (b.featured - a.featured) || ((a.status === 'sold') - (b.status === 'sold')),
+    featured: (a, b) => (isSoldOut(a) - isSoldOut(b)) || (b.featured - a.featured),
     new: (a, b) => String(b.created_at).localeCompare(String(a.created_at)),
     low: (a, b) => a.price - b.price,
     high: (a, b) => b.price - a.price,
@@ -126,8 +140,8 @@ function renderGrid() {
     return;
   }
   grid.innerHTML = list.map((p, i) => {
-    const sold = p.status === 'sold';
-    const badge = sold ? `<span class="badge sold">${t('badge.sold')}</span>`
+    const sold = isSoldOut(p);
+    const badge = sold ? `<span class="badge sold">${t('badge.soldout')}</span>`
       : p.status === 'reserved' ? `<span class="badge reserved">${t('badge.reserved')}</span>`
       : p.featured ? `<span class="badge featured">${t('badge.featured')}</span>` : '';
     const name = escapeHtml(localName(p));
@@ -193,65 +207,41 @@ $('#savedBtn').addEventListener('click', () => {
   $('#collection').scrollIntoView({ behavior: reducedMotion ? 'auto' : 'smooth' });
 });
 
-// ---------- spotlight carousel ----------
-let spotIndex = 0, spotTimer = null, spotItems = [];
-
-function renderSpotlight() {
-  const featured = state.products.filter((p) => p.featured && p.status !== 'sold');
-  spotItems = (featured.length ? featured : state.products.filter((p) => p.status === 'available')).slice(0, 6);
-  if (spotItems.length < 2) return;
-  spotIndex = 0;
-  $('#spotlight').hidden = false;
-  reveal($$('#spotlight .reveal'));
-  $('#spotTrack').innerHTML = spotItems.map((p, i) => `
-    <article class="spot${i === 0 ? ' is-on' : ''}" data-id="${escapeHtml(p.id)}" aria-hidden="${i !== 0}">
-      <div class="spot-art">
-        <img src="${escapeHtml(imageSrc(p))}" alt="${escapeHtml(localName(p))}" loading="lazy">
+// ---------- new arrivals: the three newest pieces still for sale ----------
+function renderArrivals() {
+  const items = state.products.filter((p) => !isSoldOut(p))
+    .sort((a, b) => String(b.created_at).localeCompare(String(a.created_at))).slice(0, 3);
+  $('#arrivals').hidden = !items.length;
+  if (!items.length) return;
+  $('#arrivalsRow').innerHTML = items.map((p, i) => {
+    const name = escapeHtml(localName(p));
+    return `
+    <article class="card arrival reveal" data-id="${escapeHtml(p.id)}" tabindex="0" style="--d:${i * 0.18}s; --f:${i * -1.7}s" aria-label="${name}">
+      <div class="card-media"><span class="badge featured">${t('badge.new')}</span>
+        <img src="${escapeHtml(imageSrc(p))}" alt="${name}" loading="lazy">
       </div>
-      <div class="spot-copy">
+      <div class="card-body">
         <span class="card-cat">${escapeHtml(catLabel(p.category))}</span>
-        <h3>${escapeHtml(localName(p))}</h3>
-        <p class="spot-desc">${escapeHtml(localDesc(p))}</p>
-        ${specLine(p) ? `<p class="card-spec">${escapeHtml(specLine(p))}</p>` : ''}
-        <p class="price">${money(p.price)}</p>
-        <div class="spot-actions">
-          <button class="btn btn-gold" data-add="${escapeHtml(p.id)}">${t('add')}</button>
-          <button class="btn btn-ghost" data-view="${escapeHtml(p.id)}">${t('spot.view')}</button>
+        <h3 class="card-name">${name}</h3>
+        <div class="card-foot">
+          <span class="price">${money(p.price)}</span>
+          <button class="add" data-add="${escapeHtml(p.id)}" aria-label="${t('addTo', { name })}">+</button>
         </div>
       </div>
-    </article>`).join('');
-  $('#spotDots').innerHTML = spotItems.map((p, i) =>
-    `<button class="spot-dot${i === 0 ? ' is-on' : ''}" data-i="${i}" role="tab" aria-label="${escapeHtml(localName(p))}" aria-selected="${i === 0}"><span></span></button>`).join('');
-  startSpot();
+    </article>`;
+  }).join('');
+  reveal($$('#arrivals .reveal'));
 }
 
-function showSpot(i) {
-  spotIndex = (i + spotItems.length) % spotItems.length;
-  $$('.spot').forEach((el, n) => { el.classList.toggle('is-on', n === spotIndex); el.setAttribute('aria-hidden', n !== spotIndex); });
-  $$('.spot-dot').forEach((el, n) => { el.classList.toggle('is-on', n === spotIndex); el.setAttribute('aria-selected', n === spotIndex); });
-}
-function startSpot() {
-  clearInterval(spotTimer);
-  if (!reducedMotion) spotTimer = setInterval(() => showSpot(spotIndex + 1), 6500);
-}
-$('#spotPrev').addEventListener('click', () => { showSpot(spotIndex - 1); startSpot(); });
-$('#spotNext').addEventListener('click', () => { showSpot(spotIndex + 1); startSpot(); });
-$('#spotDots').addEventListener('click', (e) => { const d = e.target.closest('[data-i]'); if (d) { showSpot(Number(d.dataset.i)); startSpot(); } });
-$('#spotStage').addEventListener('pointerenter', () => clearInterval(spotTimer));
-$('#spotStage').addEventListener('pointerleave', startSpot);
-$('#spotTrack').addEventListener('click', (e) => {
+$('#arrivalsRow').addEventListener('click', (e) => {
   const add = e.target.closest('[data-add]');
   if (add) { addToBag(add.dataset.add, 1, add); return; }
-  const view = e.target.closest('[data-view]') || e.target.closest('.spot-art');
-  if (view) openProduct(view.dataset.view || view.closest('.spot').dataset.id);
+  const card = e.target.closest('.card');
+  if (card) openProduct(card.dataset.id);
 });
-let touchX = null;
-$('#spotTrack').addEventListener('touchstart', (e) => { touchX = e.touches[0].clientX; }, { passive: true });
-$('#spotTrack').addEventListener('touchend', (e) => {
-  if (touchX === null) return;
-  const dx = e.changedTouches[0].clientX - touchX;
-  if (Math.abs(dx) > 40) { showSpot(spotIndex + (dx < 0 ? 1 : -1)); startSpot(); }
-  touchX = null;
+$('#arrivalsRow').addEventListener('keydown', (e) => {
+  const card = e.target.closest('.card');
+  if (card && e.target === card && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); openProduct(card.dataset.id); }
 });
 
 $('#grid').addEventListener('click', (e) => {
@@ -303,17 +293,17 @@ function openProduct(id) {
   $('#pmPrice').textContent = money(p.price);
   $('#pmDesc').textContent = localDesc(p);
   const specs = [[t('spec.material'), p.material], [t('spec.weight'), p.weight], [t('spec.origin'), p.origin],
-    [t('spec.status'), t(`status.${p.status}`)]];
+    [t('spec.status'), isSoldOut(p) ? t('badge.soldout') : t(`status.${p.status}`)]];
   $('#pmSpecs').innerHTML = specs.filter(([, v]) => v)
     .map(([k, v]) => `<dt>${k}</dt><dd>${escapeHtml(v)}</dd>`).join('');
   $('#pmQty').textContent = qty;
-  const sold = p.status === 'sold';
+  const sold = isSoldOut(p);
   $('#pmAdd').disabled = sold;
-  $('#pmAdd').textContent = sold ? t('status.sold') : t('add');
+  $('#pmAdd').textContent = sold ? t('badge.soldout') : t('add');
   $('#pmAsk').href = waLink(`${t('wa.ask', { shop: CONFIG.shopName, name: localName(p), price: money(p.price) })}\n${productUrl(p)}`);
   $('#pmHeart').setAttribute('aria-pressed', saved.has(p.id));
   const more = state.products
-    .filter((x) => x.id !== p.id && x.status !== 'sold')
+    .filter((x) => x.id !== p.id && !isSoldOut(x))
     .sort((a, b) => (b.category === p.category) - (a.category === p.category) || Math.abs(a.price - p.price) - Math.abs(b.price - p.price))
     .slice(0, 3);
   $('#pmMore').hidden = !more.length;
@@ -340,7 +330,7 @@ modal.addEventListener('click', (e) => {
   const more = e.target.closest('[data-open]');
   if (more) { openProduct(more.dataset.open); return; }
   const q = e.target.closest('[data-q]');
-  if (q) { qty = Math.max(1, Math.min(20, qty + Number(q.dataset.q))); $('#pmQty').textContent = qty; }
+  if (q && current) { qty = Math.max(1, Math.min(maxQty(current), qty + Number(q.dataset.q))); $('#pmQty').textContent = qty; }
 });
 $('#pmHeart').addEventListener('click', (e) => { if (current) toggleSaved(current.id, e.currentTarget); });
 
@@ -365,11 +355,14 @@ $('#pmAdd').addEventListener('click', (e) => {
 });
 
 // ---------- bag ----------
+// Customers never see stock counts, but they can't ask for more than there are.
+const maxQty = (p) => Math.max(1, Math.min(20, stockOf(p)));
+
 function addToBag(id, n, fromEl) {
   const p = state.products.find((x) => x.id === id);
-  if (!p || p.status === 'sold') return;
+  if (!p || isSoldOut(p)) return;
   const line = bag.find((l) => l.id === id);
-  if (line) line.qty = Math.min(20, line.qty + n); else bag.push({ id, qty: n });
+  if (line) line.qty = Math.min(maxQty(p), line.qty + n); else bag.push({ id, qty: Math.min(maxQty(p), n) });
   saveBag();
   renderBag();
   flyToBag(fromEl, imageSrc(p));
@@ -437,7 +430,8 @@ $('#bagList').addEventListener('click', (e) => {
   if (step) {
     line.qty += Number(step.dataset.step);
     if (line.qty < 1) bag = bag.filter((l) => l !== line);
-    line.qty = Math.min(20, line.qty);
+    const p = state.products.find((x) => x.id === line.id);
+    line.qty = Math.min(p ? maxQty(p) : 20, line.qty);
   }
   saveBag();
   renderBag();

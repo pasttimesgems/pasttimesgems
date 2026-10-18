@@ -5,12 +5,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="robots" content="noindex, nofollow">
   <title>Past Times Gems · Admin</title>
-  <meta name="theme-color" content="#06131a">
+  <meta name="theme-color" content="#0b0a08">
   <link rel="icon" href="assets/brand/favicon.png" type="image/png">
   <link rel="apple-touch-icon" href="assets/brand/apple-touch-icon.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;1,500&family=Jost:wght@300;400;500&family=Tajawal:wght@400&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,400&family=Manrope:wght@300;400;500;600&family=Tajawal:wght@400&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="assets/css/admin.css">
 </head>
 <body>
@@ -23,8 +23,8 @@
   <section class="login" id="loginView" hidden>
     <form class="login-card" id="loginForm">
       <img class="login-logo" src="assets/brand/logo.png" alt="" width="130" height="159">
-      <h1>Past Times <em>Gems</em></h1>
-      <p class="muted">Staff sign in</p>
+      <h1>Welcome back</h1>
+      <p class="muted">Sign in to look after the collection</p>
       <label>Email<input name="email" type="email" autocomplete="username" required></label>
       <label>Password<input name="password" type="password" autocomplete="current-password" required></label>
       <p class="error" id="loginError" role="alert"></p>
@@ -34,42 +34,118 @@
     </form>
   </section>
 
-  <!-- Dashboard -->
+  <!-- App -->
   <div class="app" id="appView" hidden>
     <header class="bar">
       <a class="brand" href="./" target="_blank" rel="noopener" title="Open the shop">
-        <img class="brand-logo" src="assets/brand/logo-mark.png" alt="" width="34" height="34">
-        <span>Past Times <em>Gems</em> <small>Admin</small></span>
+        <img class="brand-logo" src="assets/brand/logo-mark.png" alt="" width="36" height="36">
+        <span>Past Times Gems</span>
       </a>
+      <nav class="tabs" role="tablist" aria-label="Admin sections">
+        <button class="tab is-on" data-tab="home" role="tab" aria-selected="true">Home</button>
+        <button class="tab" data-tab="products" role="tab" aria-selected="false">Products</button>
+        <button class="tab" data-tab="reports" role="tab" aria-selected="false">Reports</button>
+        <button class="tab" data-tab="settings" role="tab" aria-selected="false">Settings</button>
+      </nav>
       <div class="bar-right">
         <span class="muted small" id="whoami"></span>
         <button class="btn btn-ghost sm" id="signOut">Sign out</button>
       </div>
     </header>
 
-    <nav class="tabs" role="tablist">
-      <button class="tab is-on" data-tab="products" role="tab" aria-selected="true">Products</button>
-      <button class="tab" data-tab="settings" role="tab" aria-selected="false">Shop settings</button>
-    </nav>
-
     <main>
-      <section id="tab-products" class="panel">
-        <div class="stats" id="stats"></div>
+      <!-- Home -->
+      <section id="tab-home" class="panel">
+        <div class="hello">
+          <div>
+            <p class="eyebrow" id="today"></p>
+            <h1 id="greeting">Good day</h1>
+          </div>
+          <button class="btn btn-gold" data-new>+ Add a product</button>
+        </div>
+        <div class="figures" id="figures"></div>
+        <div class="home-grid">
+          <section class="box">
+            <header class="box-head"><h2>Needs attention</h2><span class="muted small">Low stock and sold out</span></header>
+            <div id="lowList" class="low-list"></div>
+          </section>
+          <section class="box">
+            <header class="box-head"><h2>Recent activity</h2><button class="link small" data-goto="reports">See all</button></header>
+            <ol id="recent" class="feed"></ol>
+          </section>
+        </div>
+      </section>
+
+      <!-- Products -->
+      <section id="tab-products" class="panel" hidden>
         <div class="list-tools">
-          <input id="aSearch" type="search" placeholder="Search products" autocomplete="off">
-          <select id="aFilter">
+          <input id="aSearch" type="search" placeholder="Search by name or item code" autocomplete="off">
+          <select id="aFilter" aria-label="Category">
             <option value="all">All categories</option>
             <option value="jewellery">Jewellery</option>
             <option value="gems">Gems</option>
             <option value="pearls">Pearls</option>
           </select>
-          <button class="btn btn-gold" id="newProduct">+ Add product</button>
+          <select id="aStock" aria-label="Stock">
+            <option value="all">Any stock</option>
+            <option value="in">In stock</option>
+            <option value="low">Low stock</option>
+            <option value="out">Sold out</option>
+          </select>
+          <button class="btn btn-gold" data-new>+ Add product</button>
         </div>
-        <div class="table" id="productTable"><p class="muted">Loading…</p></div>
+        <div class="cards" id="productCards"><p class="muted">Loading…</p></div>
       </section>
 
+      <!-- Reports -->
+      <section id="tab-reports" class="panel" hidden>
+        <div class="print-head" aria-hidden="true">
+          <img src="assets/brand/logo.png" alt="" width="90" height="110">
+          <div><strong>Past Times Gems</strong><span>Inventory report</span><span id="printRange"></span></div>
+        </div>
+        <div class="range">
+          <div class="chips" role="group" aria-label="Report period">
+            <button class="chip is-on" data-range="today">Today</button>
+            <button class="chip" data-range="week">This week</button>
+            <button class="chip" data-range="month">This month</button>
+            <button class="chip" data-range="custom">Custom</button>
+          </div>
+          <div class="custom" id="customRange" hidden>
+            <label>From<input type="date" id="rFrom"></label>
+            <label>To<input type="date" id="rTo"></label>
+          </div>
+          <div class="range-actions">
+            <button class="btn btn-ghost sm" id="exportCsv">Download Excel</button>
+            <button class="btn btn-ghost sm" id="printReport">Print / PDF</button>
+          </div>
+        </div>
+        <p class="range-label" id="rangeLabel"></p>
+        <div class="figures" id="reportFigures"></div>
+        <section class="box">
+          <header class="box-head"><h2>Sales by piece</h2></header>
+          <div class="table-wrap" id="salesTable"></div>
+        </section>
+        <section class="box">
+          <header class="box-head"><h2>Stock history</h2>
+            <select id="historyKind" aria-label="Type of change">
+              <option value="all">All changes</option>
+              <option value="sold">Sold</option>
+              <option value="returned">Returned</option>
+              <option value="added">Added</option>
+              <option value="corrected">Corrected</option>
+            </select>
+          </header>
+          <div class="table-wrap" id="historyTable"></div>
+        </section>
+        <section class="box">
+          <header class="box-head"><h2>Stock now</h2><span class="muted small">Today's count for every piece</span></header>
+          <div class="table-wrap" id="stockTable"></div>
+        </section>
+      </section>
+
+      <!-- Settings -->
       <section id="tab-settings" class="panel" hidden>
-        <form class="card-form" id="settingsForm">
+        <form class="box card-form" id="settingsForm">
           <h2>Shop settings</h2>
           <label>WhatsApp number for orders
             <input name="whatsapp_number" inputmode="numeric" placeholder="97455512345">
@@ -81,6 +157,17 @@
           <label>Instagram username (optional)
             <input name="instagram" placeholder="past_timesofficial">
           </label>
+          <h3>Visit us card</h3>
+          <label>Address
+            <input name="address" maxlength="160" placeholder="e.g. Souq Waqif, Doha">
+          </label>
+          <label>Opening hours (optional)
+            <input name="hours" maxlength="160" placeholder="e.g. Sat to Thu, 10am to 10pm">
+          </label>
+          <label>Google Maps link (optional)
+            <input name="map_url" type="url" placeholder="https://maps.app.goo.gl/…">
+            <span class="help">Leave empty and the button searches for the address instead.</span>
+          </label>
           <div class="row-end"><button class="btn btn-gold" type="submit">Save settings</button></div>
         </form>
       </section>
@@ -91,7 +178,10 @@
   <dialog class="editor" id="editor" aria-labelledby="editorTitle">
     <form id="productForm" method="dialog">
       <header>
-        <h2 id="editorTitle">Add product</h2>
+        <div>
+          <h2 id="editorTitle">Add product</h2>
+          <span class="sku" id="editorSku"></span>
+        </div>
         <button type="button" class="x" data-close aria-label="Close">×</button>
       </header>
       <div class="editor-body">
@@ -116,8 +206,25 @@
                 <option value="pearls">Pearls</option>
               </select>
             </label>
-            <label>Price (QAR)<input name="price" type="number" min="0" step="0.01" required></label>
+            <label>Selling price (QAR)<input name="price" type="number" min="0" step="0.01" required></label>
           </div>
+
+          <fieldset class="stock-box">
+            <legend>Stock</legend>
+            <div class="three">
+              <label id="stockField">Pieces available<input name="stock" type="number" min="0" step="1" value="1" required></label>
+              <div class="stock-now" id="stockNow" hidden>
+                <span class="help">In stock now</span>
+                <b id="stockNowN">0</b>
+                <button type="button" class="link small" id="editorStock">Update stock</button>
+              </div>
+              <label>Low-stock alert at<input name="low_stock" type="number" min="0" step="1" value="1">
+              </label>
+              <label>Cost price (QAR)<input name="cost" type="number" min="0" step="0.01" placeholder="Only you see this"></label>
+            </div>
+            <span class="help">You'll be alerted when stock falls to the alert level. Customers never see counts or cost, only "Sold out" at zero.</span>
+          </fieldset>
+
           <label>Description<textarea name="description" rows="3" maxlength="1000"></textarea></label>
           <label>Description in Arabic (optional)<textarea name="description_ar" dir="rtl" lang="ar" rows="3" maxlength="1000"></textarea></label>
           <div class="two">
@@ -130,7 +237,6 @@
               <select name="status">
                 <option value="available">Available</option>
                 <option value="reserved">Reserved</option>
-                <option value="sold">Sold</option>
               </select>
             </label>
           </div>
@@ -145,6 +251,35 @@
         <span class="error" id="editorError" role="alert"></span>
         <button type="button" class="btn btn-ghost" data-close>Cancel</button>
         <button type="submit" class="btn btn-gold" id="saveProduct" value="save">Save product</button>
+      </footer>
+    </form>
+  </dialog>
+
+  <!-- Stock change -->
+  <dialog class="editor stock-dialog" id="stockDialog" aria-labelledby="stockTitle">
+    <form id="stockForm" method="dialog">
+      <header>
+        <div>
+          <h2 id="stockTitle">Update stock</h2>
+          <span class="sku" id="stockSku"></span>
+        </div>
+        <button type="button" class="x" data-close aria-label="Close">×</button>
+      </header>
+      <div class="stock-body">
+        <div class="kinds" role="radiogroup" aria-label="What happened">
+          <label><input type="radio" name="kind" value="sold" checked><span>Sold</span></label>
+          <label><input type="radio" name="kind" value="returned"><span>Returned</span></label>
+          <label><input type="radio" name="kind" value="added"><span>Added</span></label>
+          <label><input type="radio" name="kind" value="corrected"><span>Correct count</span></label>
+        </div>
+        <label><span id="qtyLabel">How many were sold?</span><input name="qty" type="number" min="0" step="1" value="1" required></label>
+        <label>Note (optional)<input name="note" maxlength="200" placeholder="Customer name, order ref…"></label>
+        <p class="stock-preview" id="stockPreview"></p>
+      </div>
+      <footer>
+        <span class="error" id="stockError" role="alert"></span>
+        <button type="button" class="btn btn-ghost" data-close>Cancel</button>
+        <button type="submit" class="btn btn-gold" id="saveStock">Save</button>
       </footer>
     </form>
   </dialog>
