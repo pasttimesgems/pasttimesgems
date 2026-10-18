@@ -1,5 +1,5 @@
 // Shop settings. Fill these in once (see SETUP.md). Everything here is safe to
-// publish: the Supabase "anon" key is designed to be public, and the database
+// publish: the Supabase publishable (or "anon") key is designed to be public, and the database
 // rules in supabase/schema.sql decide who can change what.
 //
 // While supabaseUrl / supabaseAnonKey are empty the site runs in DEMO MODE:
@@ -10,9 +10,10 @@ export const CONFIG = {
   tagline: 'Jewellery · Gems · Pearls',
   location: 'Doha, Qatar',
 
-  // From Supabase: Project Settings → API
-  supabaseUrl: '',
-  supabaseAnonKey: '',
+  // From Supabase: Project Settings → API Keys. The publishable key
+  // (sb_publishable_…) or the older anon key both work here.
+  supabaseUrl: 'https://ybrixergtkgvxdagcudi.supabase.co',
+  supabaseAnonKey: 'sb_publishable_QNKul2Vb74jN8AeuBtsrUA_32vgfU79',
 
   // WhatsApp number that receives orders: country code + number, digits only.
   // Example for Qatar: '97455512345'. Can also be changed later in the admin page.
